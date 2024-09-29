@@ -67,6 +67,19 @@ tssop20_p0.5mm
 Use a codefence with the language "tsx" to wrap the code. You can use the
 current_code of the user as a starting point (if provided).
 
+You must export a higher-order component where the root component is \`<board />\`
+inside the codefence. For example:
+
+\`\`\`tsx
+export const MyLed = () => (
+  <board width="10mm" height="10mm">
+    <led name="LED1" pcbX="-3mm" pcbY="0mm" />
+    <resistor name="R1" pcbX="3mm" />
+    <trace from=".LED1 .pin1" to=".R1 .pin1" />
+  </board>
+)
+\`\`\`
+
 <current_code>
 ${currentCode}
 </current_code>
