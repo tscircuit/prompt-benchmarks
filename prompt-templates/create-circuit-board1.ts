@@ -23,8 +23,8 @@ Here's an overview of the tscircuit API:
   8: "GND",
 }} />
 <diode name="D1" />
-<resistor name="R1" />
-<capacitor name="C1" />
+<resistor name="R1" resistance="1k" />
+<capacitor name="C1" capacitance="100nF" />
 <trace from=".R1 .pin1" to=".C1 .pin1" />
 <trace from=".U1 .pin5" to=".D1 .pin2" />
 <trace from=".U1 .D3" to=".U1 .GND" />
@@ -57,6 +57,8 @@ tssop20_p0.5mm
 - \`<trace />\` components use CSS selectors in the \`from\` and \`to\` fields
   to connect components.
 - Any component can have a \`name\` prop
+- \`pcbX\` and \`pcbY\` are optional and default to 0.
+- A board is centered on the origin (pcbX=0, pcbY=0)
 
 
 ### Quirks
