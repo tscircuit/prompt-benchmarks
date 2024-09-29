@@ -1,10 +1,21 @@
 {
-  "name": "prompt-benchmarks",
-  "module": "index.ts",
+  "name": "@tscircuit/prompt-benchmarks",
+  "version": "0.0.1",
+  "module": "dist/index.js",
+  "repository": "github:tscircuit/prompt-benchmarks",
+  "homepage": "https://github.com/tscircuit/prompt-benchmarks#readme",
+  "bugs": "https://github.com/tscircuit/prompt-benchmarks/issues",
+  "license": "MIT",
+  "author": "Severin Ibarluzea",
+  "scripts": {
+    "build": "tsup lib/index.ts --format esm --dts",
+    "test": "bun test"
+  },
   "type": "module",
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.27.3",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "tsup": "^8.3.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
