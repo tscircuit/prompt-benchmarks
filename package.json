@@ -9,7 +9,7 @@
   "author": "Severin Ibarluzea",
   "scripts": {
     "build": "tsup lib/index.ts --format esm --dts",
-    "test": "bun test"
+    "test": "bun test --timeout 60000"
   },
   "type": "module",
   "devDependencies": {

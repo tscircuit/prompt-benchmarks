@@ -22,15 +22,15 @@ Here's an overview of the tscircuit API:
   7: "EN",
   8: "GND",
 }} />
-<diode name="D1" />
-<resistor name="R1" resistance="1k" />
-<capacitor name="C1" capacitance="100nF" />
+<diode name="D1" footprint="0805" />
+<resistor name="R1" resistance="1k" footprint="0402" />
+<capacitor name="C1" capacitance="100nF" footprint="0603" />
 <trace from=".R1 .pin1" to=".C1 .pin1" />
 <trace from=".U1 .pin5" to=".D1 .pin2" />
 <trace from=".U1 .D3" to=".U1 .GND" />
 <trace from=".U1 .D2" to="net.VCC" />
-<resistor pullupFor=".U1 .D1" pullupTo="net.VCC" />
-<resistor decouplingFor=".U1 .VCC" decouplingTo="net.GND" />
+<resistor pullupFor=".U1 .D1" pullupTo="net.VCC" footprint="axial_p0.2in" />
+<resistor decouplingFor=".U1 .VCC" decouplingTo="net.GND" footprint="axial_p5.08mm" />
 
 ### footprint strings
 
@@ -49,6 +49,7 @@ soic8_p1.27mm
 dip16
 pinrow10
 tssop20_p0.5mm
+sot23
 
 ### Notes
 
@@ -58,11 +59,27 @@ tssop20_p0.5mm
   to connect components.
 - Any component can have a \`name\` prop
 - \`pcbX\` and \`pcbY\` are optional and default to 0.
-- A board is centered on the origin (pcbX=0, pcbY=0)
+- A board is centered on the origin (pcbX=0, pcbY=0), so to place a component
+  at the center it must be placed at pcbX=0,pcbY=0. Similarly, if you're trying
+  to layout components around the center, you would make ones to the left of
+  the center have negative pcbX values, below the center have negative pcbY,
+  and to the right of the center have positive pcbX values, and above the
+  center have positive pcbY values.
+- Generally every component that is going to be placed should be given a
+  footprint
 
+### Trace Reference Syntax
+
+Traces are created using the \`<trace />\` component. The \`from\` and \`to\`
+fields are CSS selectors that reference the components to connect.
+
+Examples:
+
+<trace from=".U1 .pin1" to=".R1 .pin1" />
+<trace from=".U1 .D3" to=".U1 .GND" />
+<trace from=".U1 .D2" to="net.VCC" />
 
 ### Quirks
-
 
 ### Output
 
