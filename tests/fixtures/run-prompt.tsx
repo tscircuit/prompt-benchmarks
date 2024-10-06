@@ -7,8 +7,10 @@ export const runInitialPrompt = async (
   userPrompt: string,
   opts: {
     model?: "claude-3-5-sonnet-20240620" | "claude-3-haiku-20240307"
+    type?: "board" | "footprint" | "package" | "model"
   } = {},
 ) => {
+  const type = opts.type ?? "board"
   const completion = await anthropic.messages.create({
     model: opts.model ?? "claude-3-5-sonnet-20240620",
     system: systemPrompt,
