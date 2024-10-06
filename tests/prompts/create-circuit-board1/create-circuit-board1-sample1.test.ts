@@ -6,8 +6,14 @@ import { sample1 } from "tests/samples/sample1"
 test("create-circuit-board1-prompt1", async () => {
   const systemPrompt = createCircuitBoard1Template({ currentCode: "" })
 
-  const code = await runInitialPrompt(systemPrompt, sample1)
+  const { success, circuit } = await runInitialPrompt(systemPrompt, sample1, {
+    model: "claude-3-haiku-20240307",
+    type: "board",
+  })
 
-  console.log(code)
-  expect(code).toBeDefined()
+  expect(success).toBe(true)
+
+  const led = circuit?.selectOne("led")
+
+  expect(led).toBeDefined()
 })
