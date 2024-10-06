@@ -1,4 +1,4 @@
-import { anthropic } from "./anthropic"
+import { anthropic } from "lib/code-runner/anthropic"
 
 export const askAboutOutput = async (
   codefence: string,
