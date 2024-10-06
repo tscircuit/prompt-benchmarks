@@ -2,10 +2,14 @@ import Anthropic from "@anthropic-ai/sdk"
 import * as React from "react"
 import { Circuit } from "@tscircuit/core"
 import { safeTranspileCode } from "./transpile-code"
+import Debug from "debug"
+
+const debug = Debug("tscircuit:prompt")
 
 export const safeEvaluateCode = (
   code: string,
   type: "board" | "footprint" | "package" | "model" = "board",
+  preSuppliedImports: Record<string, any> = {},
 ):
   | {
       success: true
@@ -31,7 +35,14 @@ export const safeEvaluateCode = (
     } => {
   globalThis.React = React
 
+  // Add pre-supplied imports to the global scope
+  for (const [key, value] of Object.entries(preSuppliedImports)) {
+    ;(globalThis as any)[key] = value
+  }
+
   const { success, error, transpiledCode } = safeTranspileCode(code)
+
+  debug({ transpiledCode, error })
 
   if (error) {
     return {
@@ -45,15 +56,33 @@ export const safeEvaluateCode = (
     }
   }
 
-  const functionBody = `var exports = {}; var module = { exports }; ${transpiledCode}; return module;`
+  const __tscircuit_require = (name: string) => {
+    if (!preSuppliedImports[name]) {
+      throw new Error(`Import "${name}" not found`)
+    }
+    return preSuppliedImports[name]
+  }
+  ;(globalThis as any).__tscircuit_require = __tscircuit_require
+
+  const functionBody = `
+    var exports = {};
+    var module = { exports };
+    var require = globalThis.__tscircuit_require;
+    ${transpiledCode}
+    return module;
+  `
   let module: any
   try {
     module = Function(functionBody).call(globalThis)
   } catch (error: any) {
+    debug({
+      errorStage: "evaluation",
+      error,
+    })
     return {
       success: false,
       error: error.message,
-      errorStage: "transpilation",
+      errorStage: "evaluation",
       hasSyntaxError: false,
     }
   }
@@ -75,6 +104,10 @@ export const safeEvaluateCode = (
   try {
     const tree = <UserElm />
   } catch (error: any) {
+    debug({
+      errorStage: "react-tree-construction",
+      error,
+    })
     return {
       success: false,
       errorStage: "react-tree-construction",
@@ -117,6 +150,10 @@ export const safeEvaluateCode = (
 
     return { success: true, circuitJson, circuit }
   } catch (error: any) {
+    debug({
+      errorStage: "circuit-rendering",
+      error,
+    })
     return {
       success: false,
       error: error.toString(),

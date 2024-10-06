@@ -14,6 +14,7 @@ export const runInitialPrompt = async (
   opts: {
     model?: "claude-3-5-sonnet-20240620" | "claude-3-haiku-20240307"
     type?: "board" | "footprint" | "package" | "model"
+    preSuppliedImports?: Record<string, any>
   } = {},
 ) => {
   const type = opts.type ?? "board"
@@ -32,6 +33,7 @@ export const runInitialPrompt = async (
   const responseText: string = (completion as any).content[0]?.text
 
   const codefence = extractCodefence(responseText)
+  debug({ codefence })
 
   if (!codefence) {
     throw new Error("No codefence found in response")
@@ -48,10 +50,9 @@ export const runInitialPrompt = async (
     syntaxError,
     circuitErrors,
     typescriptErrors,
-  } = safeEvaluateCode(codefence, type)
+  } = safeEvaluateCode(codefence, type, opts.preSuppliedImports)
 
   if (success) {
-    debug(`codefence:\n ${codefence}`)
     return {
       success: true as const,
       codefence,
