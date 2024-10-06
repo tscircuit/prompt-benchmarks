@@ -79,6 +79,14 @@ Examples:
 <trace from=".U1 .D3" to=".U1 .GND" />
 <trace from=".U1 .D2" to="net.VCC" />
 
+### Importing Components
+
+You can import a variety of components from the tscircuit registry. tscircuit
+registry components are always prefixed with \`@tsci/\`. Make sure to include
+your imports at the top of the codefence.
+
+If you are not told explicitly that an import exists, do not import it.
+
 ### Quirks
 
 ### Output
