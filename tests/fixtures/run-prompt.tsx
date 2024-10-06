@@ -1,4 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk"
+import * as React from "react"
+import { Circuit } from "@tscircuit/core"
+import {evaluateCode} from "./evaluate-code"
 
 const anthropic = new Anthropic()
 
@@ -33,11 +36,12 @@ export const runInitialPrompt = async (
     throw new Error("No codefence found in response")
   }
 
-  // TODO run the codefence, detect syntax errors
+  // Run the codefence, detect syntax errors, and evaluate circuit
+  const { message, circuitJson } = evaluateCode(codefence, type)
 
-  // TODO render the circuit, get the errors with circuitJson.filter(elm => elm.type === "error")
+  const hasSyntaxError = message.startsWith("Eval Error:")
+  const circuitErrors = circuitJson?.filter(elm => elm.type.includes("error")) || []
+  const typescriptErrors = message.startsWith("Render Error:") ? [message] : []
 
-  // TODO evaluate the code for typescript errors
-
-  return { codefence, hasSyntaxError, circuitErrors, typescriptErrors }
+  return { codefence, hasSyntaxError, circuitErrors, typescriptErrors, circuitJson }
 }
