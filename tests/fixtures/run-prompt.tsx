@@ -31,5 +31,11 @@ export const runInitialPrompt = async (
     throw new Error("No codefence found in response")
   }
 
-  return codefence
+  // TODO run the codefence, detect syntax errors
+
+  // TODO render the circuit, get the errors with circuitJson.filter(elm => elm.type === "error")
+
+  // TODO evaluate the code for typescript errors
+
+  return { codefence, hasSyntaxError, circuitErrors, typescriptErrors }
 }
