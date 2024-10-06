@@ -1,9 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk"
 import * as React from "react"
 import { Circuit } from "@tscircuit/core"
-import { safeEvaluateCode } from "./safe-evaluate-code"
+import { safeEvaluateCode } from "lib/code-runner/safe-evaluate-code"
 import { extractCodefence } from "extract-codefence"
-import { anthropic } from "./anthropic"
+import { anthropic } from "lib/code-runner/anthropic"
 import Debug from "debug"
 
 const debug = Debug("tscircuit:prompt")
