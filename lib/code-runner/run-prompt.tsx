@@ -3,8 +3,10 @@ import * as React from "react"
 import { Circuit } from "@tscircuit/core"
 import { safeEvaluateCode } from "./safe-evaluate-code"
 import { extractCodefence } from "extract-codefence"
+import { anthropic } from "./anthropic"
+import Debug from "debug"
 
-const anthropic = new Anthropic()
+const debug = Debug("tscircuit:prompt")
 
 export const runInitialPrompt = async (
   systemPrompt: string,
@@ -49,6 +51,7 @@ export const runInitialPrompt = async (
   } = safeEvaluateCode(codefence, type)
 
   if (success) {
+    debug(`codefence:\n ${codefence}`)
     return {
       success: true as const,
       codefence,
