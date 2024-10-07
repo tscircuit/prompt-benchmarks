@@ -15,8 +15,11 @@ export default function TestComponent() {
 }
   `
 
-  const result = safeEvaluateCode(testCode, "board", {
-    "@tsci/seveibar.custom-component": MyCustomComponent,
+  const result = safeEvaluateCode(testCode, {
+    outputType: "board",
+    preSuppliedImports: {
+      "@tsci/seveibar.custom-component": MyCustomComponent,
+    },
   })
 
   expect(result.success).toBe(true)
