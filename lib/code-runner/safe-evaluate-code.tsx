@@ -3,13 +3,13 @@ import * as React from "react"
 import { Circuit } from "@tscircuit/core"
 import { safeTranspileCode } from "./transpile-code"
 import Debug from "debug"
+import type { CodeRunnerContext } from "./code-runner-context"
 
 const debug = Debug("tscircuit:prompt")
 
 export const safeEvaluateCode = (
   code: string,
-  type: "board" | "footprint" | "package" | "model" = "board",
-  preSuppliedImports: Record<string, any> = {},
+  context: CodeRunnerContext,
 ):
   | {
       success: true
@@ -34,6 +34,8 @@ export const safeEvaluateCode = (
       circuitJson?: undefined
     } => {
   globalThis.React = React
+
+  const { preSuppliedImports = {}, outputType } = context
 
   // Add pre-supplied imports to the global scope
   for (const [key, value] of Object.entries(preSuppliedImports)) {
@@ -118,21 +120,21 @@ export const safeEvaluateCode = (
 
   const circuit = new Circuit()
   try {
-    if (type === "board") {
+    if (outputType === "board") {
       circuit.add(<UserElm />)
-    } else if (type === "package") {
+    } else if (outputType === "package") {
       circuit.add(
         <board width="10mm" height="10mm">
           <UserElm name="U1" />
         </board>,
       )
-    } else if (type === "footprint") {
+    } else if (outputType === "footprint") {
       circuit.add(
         <board width="10mm" height="10mm">
           <chip name="U1" footprint={<UserElm />} />
         </board>,
       )
-    } else if (type === "model") {
+    } else if (outputType === "model") {
       // Note: This part might need adjustment as we don't have access to jscad-related imports
       // const jscadGeoms: any[] = []
       // const { createJSCADRoot } = createJSCADRenderer(jscadPlanner as any)

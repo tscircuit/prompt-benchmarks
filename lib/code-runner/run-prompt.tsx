@@ -49,11 +49,10 @@ export const runInitialPrompt = async (
     syntaxError,
     circuitErrors,
     typescriptErrors,
-  } = safeEvaluateCode(
-    codefence,
-    context.outputType,
-    context.preSuppliedImports,
-  )
+  } = safeEvaluateCode(codefence, {
+    outputType: context.outputType,
+    preSuppliedImports: context.preSuppliedImports,
+  })
 
   if (success) {
     return {
