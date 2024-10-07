@@ -24,3 +24,7 @@ export interface CodeRunnerContext {
    */
   outputType: OutputType
 }
+
+export interface PromptAndRunnerContext
+  extends PromptContext,
+    CodeRunnerContext {}

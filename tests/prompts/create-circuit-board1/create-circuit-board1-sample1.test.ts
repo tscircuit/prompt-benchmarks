@@ -6,10 +6,13 @@ import { sample1 } from "tests/samples/sample1"
 test("create-circuit-board1-prompt1", async () => {
   const systemPrompt = createCircuitBoard1Template({ currentCode: "" })
 
-  const { success, circuit } = await runInitialPrompt(systemPrompt, sample1, {
-    model: "claude-3-haiku-20240307",
-    type: "board",
-  })
+  const { success, circuit } = await runInitialPrompt(
+    { systemPrompt, userPrompt: sample1 },
+    {
+      model: "claude-3-haiku-20240307",
+      outputType: "board",
+    }
+  )
 
   expect(success).toBe(true)
 

@@ -8,12 +8,11 @@ test("create-circuit-board1-prompt1", async () => {
   const systemPrompt = createCircuitBoard1Template({ currentCode: "" })
 
   const { success, circuit, codefence } = await runInitialPrompt(
-    systemPrompt,
-    sample1,
+    { systemPrompt, userPrompt: sample1 },
     {
       model: "claude-3-haiku-20240307",
-      type: "board",
-    },
+      outputType: "board",
+    }
   )
 
   expect(success).toBe(true)
