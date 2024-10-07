@@ -1,6 +1,7 @@
 export const createCircuitBoard1Template = ({
   currentCode = "",
-}: { currentCode?: string }) =>
+  availableImports,
+}: { currentCode?: string; availableImports?: Record<string, string> }) =>
   `
 Please create a circuit board in tscircuit with the user-provided description.
 
@@ -86,6 +87,23 @@ registry components are always prefixed with \`@tsci/\`. Make sure to include
 your imports at the top of the codefence.
 
 If you are not told explicitly that an import exists, do not import it.
+
+#### Available Imports
+
+${
+  !availableImports
+    ? "There are no available imports."
+    : Object.entries(availableImports)
+        .map(([name, description]) =>
+          `
+##### \`${name}\`
+
+${description}
+
+`.trim(),
+        )
+        .join("\n")
+}
 
 ### Quirks
 
