@@ -22,10 +22,14 @@ test("create-circuit-board1-prompt1", async () => {
   )
   const { success, circuit, codefence, error } = await runInitialPrompt(
     systemPrompt,
-    `
-an led with an 0402 footprint
-
-For the power supply, use a MicroUSB connector.
+    "an led with an 0402 footprint",
+    {
+      model: "claude-3-haiku-20240307",
+      type: "board",
+      availableImports: {
+        "@tsci/seveibar.micro-usb": `
+        
+If no power supply is specified, MicroUSB can be a good power supply.
 
 Example usage:
 
@@ -40,12 +44,9 @@ import MicroUsb from "@tsci/seveibar.micro-usb"
   dataPlus="..."
   dataMinus="..."
 />
-\`\`\`
-
-`.trim(),
-    {
-      model: "claude-3-haiku-20240307",
-      type: "board",
+\`\`\` 
+        `.trim(),
+      },
       preSuppliedImports: {
         "@tsci/seveibar.micro-usb": MicroUsb,
       },

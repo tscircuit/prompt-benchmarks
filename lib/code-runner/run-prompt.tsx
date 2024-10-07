@@ -14,6 +14,7 @@ export const runInitialPrompt = async (
   opts: {
     model?: "claude-3-5-sonnet-20240620" | "claude-3-haiku-20240307"
     type?: "board" | "footprint" | "package" | "model"
+    availableImports?: Record<string, string>
     preSuppliedImports?: Record<string, any>
   } = {},
 ) => {
