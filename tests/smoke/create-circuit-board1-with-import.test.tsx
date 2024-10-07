@@ -21,11 +21,10 @@ test("create-circuit-board1-prompt1", async () => {
     />
   )
   const { success, circuit, codefence, error } = await runInitialPrompt(
-    systemPrompt,
-    "an led with an 0402 footprint",
+    { systemPrompt, userPrompt: "an led with an 0402 footprint" },
     {
       model: "claude-3-haiku-20240307",
-      type: "board",
+      outputType: "board",
       availableImports: {
         "@tsci/seveibar.micro-usb": `
         
@@ -50,7 +49,7 @@ import MicroUsb from "@tsci/seveibar.micro-usb"
       preSuppliedImports: {
         "@tsci/seveibar.micro-usb": MicroUsb,
       },
-    },
+    }
   )
 
   expect(success).toBe(true)

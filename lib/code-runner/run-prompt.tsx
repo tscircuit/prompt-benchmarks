@@ -5,22 +5,20 @@ import { safeEvaluateCode } from "lib/code-runner/safe-evaluate-code"
 import { extractCodefence } from "extract-codefence"
 import { anthropic } from "lib/code-runner/anthropic"
 import Debug from "debug"
+import type {
+  PromptAndRunnerContext,
+  PromptContext,
+} from "./code-runner-context"
 
 const debug = Debug("tscircuit:prompt")
 
 export const runInitialPrompt = async (
-  systemPrompt: string,
-  userPrompt: string,
-  opts: {
-    model?: "claude-3-5-sonnet-20240620" | "claude-3-haiku-20240307"
-    type?: "board" | "footprint" | "package" | "model"
-    availableImports?: Record<string, string>
-    preSuppliedImports?: Record<string, any>
-  } = {},
+  { systemPrompt, userPrompt }: { systemPrompt: string; userPrompt: string },
+  context: PromptAndRunnerContext,
 ) => {
-  const type = opts.type ?? "board"
+  const type = context.outputType
   const completion = await anthropic.messages.create({
-    model: opts.model ?? "claude-3-5-sonnet-20240620",
+    model: context.model,
     system: systemPrompt,
     messages: [
       {
@@ -51,7 +49,11 @@ export const runInitialPrompt = async (
     syntaxError,
     circuitErrors,
     typescriptErrors,
-  } = safeEvaluateCode(codefence, type, opts.preSuppliedImports)
+  } = safeEvaluateCode(
+    codefence,
+    context.outputType,
+    context.preSuppliedImports,
+  )
 
   if (success) {
     return {
