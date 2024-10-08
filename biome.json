@@ -29,6 +29,7 @@
         "noExplicitAny": "off"
       },
       "style": {
+        "noParameterAssign": "off",
         "noNonNullAssertion": "off",
         "useNumberNamespace": "off",
         "useFilenamingConvention": {

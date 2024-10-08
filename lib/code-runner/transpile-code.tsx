@@ -1,21 +1,10 @@
-// if (!code) return ""
-// if (isStreaming) return ""
-// try {
-//   const result = Babel.transform(code, {
-//     presets: ["react", "typescript"],
-//     plugins: ["transform-modules-commonjs"],
-//     filename: "virtual.tsx",
-//   })
-//   return result.code || ""
-// } catch (error: any) {
-//   console.error("Babel compilation error:", error)
-//   return `Error: ${error.message}`
-// }
-
-
 import * as Babel from "@babel/standalone"
 
-export const safeTranspileCode = (code: string): { success: true, transpiledCode: string, error: undefined } | { success: false, error: string, transpiledCode: undefined } => {
+export const safeTranspileCode = (
+  code: string,
+):
+  | { success: true; transpiledCode: string; error: undefined }
+  | { success: false; error: string; transpiledCode: undefined } => {
   if (!code) return { success: true, transpiledCode: "", error: undefined }
   try {
     const result = Babel.transform(code, {
@@ -23,7 +12,11 @@ export const safeTranspileCode = (code: string): { success: true, transpiledCode
       plugins: ["transform-modules-commonjs"],
       filename: "index.tsx",
     })
-    return { success: true, transpiledCode: result.code || "", error: undefined }
+    return {
+      success: true,
+      transpiledCode: result.code || "",
+      error: undefined,
+    }
   } catch (error: any) {
     console.error("Babel compilation error:", error)
     return { success: false, error: error.message, transpiledCode: undefined }
