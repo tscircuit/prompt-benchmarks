@@ -15,11 +15,12 @@ export async function safeCompileDts(code: string): Promise<{
   dts: string
 }> {
   try {
+    const fileName = "index.ts" // Changed from "index.tsx" to "index.ts"
     const fsMap = new Map<string, string>()
-    fsMap.set("index.tsx", code)
+    fsMap.set(fileName, code)
 
     const system = createSystem(fsMap)
-    const env = createVirtualTypeScriptEnvironment(system, [], ts, {
+    const env = createVirtualTypeScriptEnvironment(system, [fileName], ts, {
       jsx: ts.JsxEmit.ReactJSX,
       declaration: true,
     })
@@ -29,8 +30,8 @@ export async function safeCompileDts(code: string): Promise<{
       typescript: ts,
       logger: console,
       fetcher: (input: RequestInfo | URL, init?: RequestInit) => {
-        // For simplicity, we'll use the default fetch.
-        // Note: In a Node.js environment, ensure 'fetch' is available.
+        // We'll need to override the fetch to get packages from the tscircuit
+        // registry, this is implemented in the snippets library
         return fetch(input, init)
       },
       delegate: {
@@ -48,7 +49,7 @@ import { Circuit } from "@tscircuit/core"
 ${code}
 `)
 
-    const { outputFiles } = env.languageService.getEmitOutput("index.tsx", true)
+    const { outputFiles } = env.languageService.getEmitOutput(fileName, true)
 
     const indexDts = outputFiles.find((file) => file.name === "index.d.ts")
 
@@ -61,6 +62,7 @@ ${code}
       dts: "",
     }
   } catch (error) {
+    console.error("Error in safeCompileDts:", error)
     return { success: false, error: error as Error, dts: "" }
   }
 }
