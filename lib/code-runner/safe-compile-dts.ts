@@ -5,9 +5,36 @@ import {
 import ts from "typescript"
 import { setupTypeAcquisition, type ATABootstrapConfig } from "@typescript/ata"
 
-// Note: Ensure that 'fetch' is available in your environment.
-// In Node.js 18 and above, 'fetch' is available globally.
-// For earlier versions, you may need to install 'node-fetch' or 'undici'.
+// Custom storage implementation that works in both browser and Node.js
+const customStorage = {
+  _data: new Map<string, string>(),
+  getItem: (key: string) => customStorage._data.get(key) ?? null,
+  setItem: (key: string, value: string) => customStorage._data.set(key, value),
+  removeItem: (key: string) => customStorage._data.delete(key),
+  clear: () => customStorage._data.clear(),
+}
+
+// Custom function to create a map of default library files
+async function createCustomDefaultMap(
+  options: ts.CompilerOptions,
+  tsVersion: string,
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>()
+  const libs = [
+    "lib.es5.d.ts",
+    // "lib.dom.d.ts",
+    "lib.es2015.d.ts",
+  ]
+
+  for (const lib of libs) {
+    const url = `https://typescript.azureedge.net/cdn/${tsVersion}/typescript/lib/${lib}`
+    const response = await fetch(url)
+    const text = await response.text()
+    map.set(`/${lib}`, text)
+  }
+
+  return map
+}
 
 export async function safeCompileDts(code: string): Promise<{
   success: boolean
@@ -15,23 +42,25 @@ export async function safeCompileDts(code: string): Promise<{
   dts: string
 }> {
   try {
-    const fileName = "index.ts" // Changed from "index.tsx" to "index.ts"
-    const fsMap = new Map<string, string>()
+    const fileName = "index.ts"
+    const fsMap = await createCustomDefaultMap(
+      { target: ts.ScriptTarget.ES2015, lib: ["es2015"] },
+      ts.version,
+    )
     fsMap.set(fileName, code)
 
     const system = createSystem(fsMap)
     const env = createVirtualTypeScriptEnvironment(system, [fileName], ts, {
+      target: ts.ScriptTarget.ES2015,
       jsx: ts.JsxEmit.ReactJSX,
       declaration: true,
+      lib: ["es2015"],
     })
 
     const ataConfig: ATABootstrapConfig = {
       projectName: "my-project",
       typescript: ts,
-      logger: console,
       fetcher: (input: RequestInfo | URL, init?: RequestInit) => {
-        // We'll need to override the fetch to get packages from the tscircuit
-        // registry, this is implemented in the snippets library
         return fetch(input, init)
       },
       delegate: {

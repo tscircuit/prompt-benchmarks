@@ -18,10 +18,6 @@ test("safeCompileDts with valid TypeScript code", async () => {
 
   const { success, dts, error } = await safeCompileDts(testCode)
 
-  if (error) {
-    console.error("Unexpected error:", error)
-  }
-
   expect(error).toBeUndefined()
   expect(success).toBe(true)
   expect(dts).toBeDefined()
