@@ -8,7 +8,7 @@
   "license": "MIT",
   "author": "Severin Ibarluzea",
   "scripts": {
-    "build": "tsup lib/index.ts lib/code-runner/index.ts lib/code-runner-utils/index.ts --format esm --dts",
+    "build": "tsup-node lib/index.ts lib/code-runner/index.ts lib/code-runner-utils/index.ts --format esm --dts",
     "test": "bun test --timeout 60000"
   },
   "exports": {
