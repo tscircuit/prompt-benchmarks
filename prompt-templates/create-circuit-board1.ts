@@ -80,7 +80,10 @@ Examples:
 <trace from=".U1 .D3" to=".U1 .GND" />
 <trace from=".U1 .D2" to="net.VCC" />
 
-### Importing Components
+${
+  !availableImports
+    ? ""
+    : `### Importing Components
 
 You can import a variety of components from the tscircuit registry. tscircuit
 registry components are always prefixed with \`@tsci/\`. Make sure to include
@@ -103,6 +106,8 @@ ${description}
 `.trim(),
         )
         .join("\n")
+}
+`
 }
 
 ### Quirks
