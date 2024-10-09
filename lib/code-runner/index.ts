@@ -1,5 +1,5 @@
 export * from "./code-runner-context"
-export * from "./get-imports-from-code"
+export * from "../code-runner-utils/get-imports-from-code"
 export * from "./run-prompt"
 export * from "./safe-evaluate-code"
 export * from "./transpile-code"

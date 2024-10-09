@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { getImportsFromCode } from "../../lib/code-runner/get-imports-from-code"
+import { getImportsFromCode } from "../../lib/code-runner-utils/get-imports-from-code"
 
 test("getImportsFromCode with various import styles", () => {
   const testCode = `
@@ -17,7 +17,14 @@ test("getImportsFromCode with various import styles", () => {
 
   const imports = getImportsFromCode(testCode)
 
-  expect(imports).toEqual(['react', 'react', 'axios', './utils', './types', './styles.css'])
+  expect(imports).toEqual([
+    "react",
+    "react",
+    "axios",
+    "./utils",
+    "./types",
+    "./styles.css",
+  ])
 })
 
 test("getImportsFromCode with no imports", () => {
@@ -42,7 +49,7 @@ test("getImportsFromCode with mixed quotes", () => {
 
   const imports = getImportsFromCode(testCode)
 
-  expect(imports).toEqual(['react', 'react', 'axios'])
+  expect(imports).toEqual(["react", "react", "axios"])
 })
 
 test("getImportsFromCode with side-effect imports", () => {
@@ -53,5 +60,5 @@ test("getImportsFromCode with side-effect imports", () => {
 
   const imports = getImportsFromCode(testCode)
 
-  expect(imports).toEqual(['dotenv/config', './polyfills'])
+  expect(imports).toEqual(["dotenv/config", "./polyfills"])
 })
