@@ -1,6 +1,6 @@
 {
   "name": "@tscircuit/prompt-benchmarks",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "dist/index.js",
   "repository": "github:tscircuit/prompt-benchmarks",
   "homepage": "https://github.com/tscircuit/prompt-benchmarks#readme",
