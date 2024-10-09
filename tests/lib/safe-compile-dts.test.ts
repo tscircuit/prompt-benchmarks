@@ -16,7 +16,9 @@ test("safeCompileDts with valid TypeScript code", async () => {
     export default Greeting;
   `
 
-  const { success, dts, error } = await safeCompileDts(testCode)
+  const { success, dts, error } = await safeCompileDts(testCode, {
+    importMapMethod: "cdn",
+  })
 
   expect(error).toBeUndefined()
   expect(success).toBe(true)

@@ -1,4 +1,6 @@
 import {
+  createDefaultMapFromCDN,
+  createDefaultMapFromNodeModules,
   createSystem,
   createVirtualTypeScriptEnvironment,
 } from "@typescript/vfs"
@@ -36,17 +38,44 @@ async function createCustomDefaultMap(
   return map
 }
 
-export async function safeCompileDts(code: string): Promise<{
+export async function safeCompileDts(
+  code: string,
+  opts: {
+    importMapMethod?: "node_modules" | "cdn" | "custom" | "none"
+  } = {},
+): Promise<{
   success: boolean
   error?: Error
   dts: string
 }> {
+  opts.importMapMethod ??= "cdn"
   try {
     const fileName = "index.ts"
-    const fsMap = await createCustomDefaultMap(
-      { target: ts.ScriptTarget.ES2015, lib: ["es2015"] },
-      ts.version,
-    )
+    let fsMap: Map<string, string>
+    const compilerOptions = { target: ts.ScriptTarget.ES2015, lib: ["es2015"] }
+    if (opts.importMapMethod === "custom") {
+      fsMap = await createCustomDefaultMap(compilerOptions, ts.version)
+    } else if (opts.importMapMethod === "node_modules") {
+      fsMap = await createDefaultMapFromNodeModules(compilerOptions, ts)
+    } else if (opts.importMapMethod === "cdn") {
+      if (!globalThis.localStorage) {
+        globalThis.localStorage = customStorage as any
+      }
+      if (!globalThis.fetch) {
+        throw new Error(
+          "Fetch is not available in the global scope, can't use CDN",
+        )
+      }
+      fsMap = await createDefaultMapFromCDN(
+        compilerOptions,
+        ts.version,
+        true,
+        ts,
+      )
+    } else {
+      fsMap = new Map()
+    }
+
     fsMap.set(fileName, code)
 
     const system = createSystem(fsMap)
