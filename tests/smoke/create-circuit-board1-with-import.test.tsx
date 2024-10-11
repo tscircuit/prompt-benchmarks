@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
 import { runInitialPrompt } from "lib/code-runner/run-prompt"
 import { createCircuitBoard1Template } from "prompt-templates/create-circuit-board1"
-import { sample1 } from "tests/samples/sample1"
+import { boardSample1 } from "tests/board-samples/sample1"
 import { askAboutOutput } from "tests/fixtures/ask-about-output"
 
 test("create-circuit-board1-prompt1", async () => {
@@ -49,7 +49,7 @@ import MicroUsb from "@tsci/seveibar.micro-usb"
       preSuppliedImports: {
         "@tsci/seveibar.micro-usb": MicroUsb,
       },
-    }
+    },
   )
 
   expect(success).toBe(true)
