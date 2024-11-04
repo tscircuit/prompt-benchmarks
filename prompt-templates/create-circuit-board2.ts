@@ -12,6 +12,7 @@ export const createCircuitBoard2Template = ({
 }: { currentCode?: string; availableImports?: Record<string, string> }) =>
   `
 Please create a circuit board in tscircuit with the user-provided description.
+Provide your output in a codefence block.
 
 ### footprint strings
 
