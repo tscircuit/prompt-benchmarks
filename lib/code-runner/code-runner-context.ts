@@ -1,4 +1,6 @@
-export type Model = "claude-3-5-sonnet-20240620" | "claude-3-haiku-20240307"
+import type { Anthropic } from "@anthropic-ai/sdk"
+
+export type Model = Anthropic.Completion["model"]
 export type OutputType = "board" | "footprint" | "package" | "model"
 
 export interface PromptContext {

@@ -1,15 +1,15 @@
 import { expect, test } from "bun:test"
 import { runInitialPrompt } from "lib/code-runner/run-prompt"
-import { createCircuitBoard1Template } from "prompt-templates/create-circuit-board1"
+import { createCircuitBoard2Template } from "prompt-templates/create-circuit-board2"
 import { boardSample1 } from "tests/board-samples/sample1"
 
 test("create-circuit-board1-prompt1", async () => {
-  const systemPrompt = createCircuitBoard1Template({ currentCode: "" })
+  const systemPrompt = createCircuitBoard2Template({ currentCode: "" })
 
   const { success, circuit } = await runInitialPrompt(
     { systemPrompt, userPrompt: boardSample1 },
     {
-      model: "claude-3-haiku-20240307",
+      model: "claude-3-5-sonnet-20241022",
       outputType: "board",
     },
   )

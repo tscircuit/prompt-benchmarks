@@ -18,9 +18,9 @@
   },
   "type": "module",
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.27.3",
+    "@anthropic-ai/sdk": "^0.31.0",
     "@biomejs/biome": "^1.9.3",
-    "@tscircuit/core": "^0.0.103",
+    "@tscircuit/core": "^0.0.153",
     "@types/babel__standalone": "^7.1.7",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
@@ -35,7 +35,8 @@
   },
   "dependencies": {
     "@babel/standalone": "^7.25.7",
+    "@tscircuit/featured-snippets": "^0.0.1",
     "debug": "^4.3.7",
-    "extract-codefence": "^0.0.3"
+    "extract-codefence": "^0.0.4"
   }
 }
