@@ -44,7 +44,7 @@ export class CodeRunner {
     this.imports[importName] = importValue
   }
 
-  async runTsx(code: string, outputType: OutputType = "board") {
+  async runSnippet(code: string, outputType: OutputType = "board") {
     // Get all imports from code
     const imports = getImportsFromCode(code)
 
@@ -61,6 +61,10 @@ export class CodeRunner {
       preSuppliedImports: this.imports,
     })
 
-    return result
+    if (result.success) {
+      return { circuitJson: result.circuitJson, circuit: result.circuit }
+    }
+
+    throw new Error(result.error)
   }
 }

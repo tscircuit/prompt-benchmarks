@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test"
 import { CodeRunner } from "../../lib/code-runner/CodeRunner"
 import * as React from "react"
+import { su } from "@tscircuit/soup-util"
 
 test("CodeRunner with @tsci imports", async () => {
   const runner = new CodeRunner({
@@ -8,28 +9,19 @@ test("CodeRunner with @tsci imports", async () => {
   })
 
   const testCode = `
-    import CustomComponent from "@tsci/seveibar.red-led"
-    
+    import { RedLed } from "@tsci/seveibar.red-led"
+
     export default function TestBoard() {
       return (
         <board width="10mm" height="10mm">
-          <CustomComponent name="U1" />
+          <RedLed name="LED1" />
         </board>
       )
     }
   `
 
-  const result = await runner.runTsx(testCode)
+  const { circuitJson, circuit } = await runner.runSnippet(testCode)
 
-  console.log(result)
-
-  expect(result.success).toBe(true)
-  expect(result.error).toBeUndefined()
-  expect(result.circuit).toBeDefined()
-
-  if (result.success) {
-    const resistor = result.circuit.selectOne("resistor")
-    expect(resistor?.props.name).toBe("U1")
-    expect(resistor?.props.resistance).toBe("1k")
-  }
+  expect(circuitJson).toBeDefined()
+  expect(circuit.db.source_component.list()[0].name).toEqual("LED1")
 })
