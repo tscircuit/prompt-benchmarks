@@ -4,12 +4,6 @@ import { getImportsFromCode } from "../code-runner-utils/get-imports-from-code"
 import { pullSnippetCompiledJs } from "./pull-snippet-import"
 import type { OutputType } from "./code-runner-context"
 
-const REGISTRY_PREFIXES = [
-  "https://data.jsdelivr.com/v1/package/resolve/npm/@tsci/",
-  "https://data.jsdelivr.com/v1/package/npm/@tsci/",
-  "https://cdn.jsdelivr.net/npm/@tsci/",
-]
-
 /**
  * This class is used to run tsx code. By default, it will add required
  * imports to build basic circuits in tscircuit like @tscircuit/core
@@ -30,7 +24,9 @@ export class CodeRunner {
   async addImportByName(importName: string) {
     if (importName.startsWith("@tsci/")) {
       // Handle @tsci imports differently using pullSnippetCompiledJs
-      const compiledJs = await pullSnippetCompiledJs(importName)
+      const compiledJs = await pullSnippetCompiledJs(importName, {
+        registryApiUrl: this.registryApiUrl,
+      })
       // Execute the compiled JS in a new context with access to this.imports
       const context = { ...this.imports }
       const fn = new Function("exports", "require", compiledJs)
@@ -38,37 +34,9 @@ export class CodeRunner {
       fn(exports, (name: string) => this.imports[name])
       this.imports[importName] = exports
     } else {
-      // Dynamically import the module via jsdelivr
-      // Check if this is a jsdelivr URL
-      const isJsdelivrUrl = REGISTRY_PREFIXES.some((prefix) =>
-        importName.startsWith(prefix),
-      )
-
-      if (isJsdelivrUrl) {
-        // Extract package info from jsdelivr URL
-        const fullPackageName = REGISTRY_PREFIXES.reduce(
-          (name, prefix) => name.replace(prefix, ""),
-          importName,
-        )
-        const packageName = fullPackageName.split("/")[0].replace(/\./, "/")
-        const pathInPackage = fullPackageName.split("/").slice(1).join("/")
-        const jsdelivrPath = `${packageName}${pathInPackage ? `/${pathInPackage}` : ""}`
-
-        // Call registry API with appropriate parameters
-        const response = await fetch(
-          `${this.registryApiUrl}/snippets/download?` +
-            `jsdelivr_resolve=${importName.includes("/resolve/")}&` +
-            `jsdelivr_path=${encodeURIComponent(jsdelivrPath)}`,
-        )
-
-        const module = await response.json()
-        this.imports[importName] = module
-      } else {
-        // Default behavior for non-jsdelivr imports
-        const url = `https://cdn.jsdelivr.net/npm/${importName}`
-        const module = await import(url)
-        this.imports[importName] = module
-      }
+      const url = `https://cdn.jsdelivr.net/npm/${importName}`
+      const module = await import(url)
+      this.imports[importName] = module
     }
   }
 

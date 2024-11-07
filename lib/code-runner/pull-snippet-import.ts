@@ -4,10 +4,10 @@
 export const pullSnippetCompiledJs = async (
   importName: string,
   opts: {
-    registryUrl?: string
+    registryApiUrl?: string
   } = {},
 ) => {
-  opts.registryUrl ??= "https://registry-api.tscircuit.com"
+  opts.registryApiUrl ??= "https://registry-api.tscircuit.com"
   if (importName.startsWith("@tsci/")) {
     // @tsci/foo.bar -> foo/bar
     importName = importName.split("@tsci/")[1].replace(/\./, "/")
@@ -19,7 +19,7 @@ export const pullSnippetCompiledJs = async (
   const [owner_name, unscoped_name] = importName.split("/")
 
   const { snippet } = await fetch(
-    `${opts.registryUrl}/snippets/get?owner_name=${owner_name}&unscoped_name=${unscoped_name}`,
+    `${opts.registryApiUrl}/snippets/get?owner_name=${owner_name}&unscoped_name=${unscoped_name}`,
   ).then((res) => res.json())
 
   return snippet.compiled_js
