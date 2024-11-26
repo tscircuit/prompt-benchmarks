@@ -57,3 +57,14 @@ questions = [
     { text = "It will take 30 minutes to fill the tank", answer = false },
     { text = "It will take 15 minutes to fill the tank", answer = false }
 ]
+
+[[problems]]
+prompt = """
+Create a 555 timer with a blinking LED.
+"""
+questions = [
+    { text = "The circuit includes a 555 timer IC", answer = true },
+    { text = "The LED blinks at a frequency of 1 Hz", answer = true },
+    { text = "The circuit uses a resistor and capacitor to set the timing", answer = true },
+    { text = "The LED is connected directly to the 555 timer output", answer = false }
+]

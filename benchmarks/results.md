@@ -102,3 +102,23 @@ how long will it take to fill the tank?
 
 ### Score
 4
+
+## Problem
+Create a 555 timer with a blinking LED.
+
+### Questions and Responses
+- The circuit includes a 555 timer IC
+  - Expected: true
+  - Actual: true
+- The LED blinks at a frequency of 1 Hz
+  - Expected: true
+  - Actual: true
+- The circuit uses a resistor and capacitor to set the timing
+  - Expected: true
+  - Actual: true
+- The LED is connected directly to the 555 timer output
+  - Expected: false
+  - Actual: false
+
+### Score
+4

@@ -35,3 +35,7 @@ This will execute the AI against the test suite defined in `benchmarks/problems.
 ## Interpreting the Results
 
 The results of the benchmark suite will be reported in `benchmarks/results.md`. Each problem will be listed along with the questions and the AI's responses. The score for each problem will indicate the accuracy of the AI's answers. A higher score means better accuracy.
+
+## Example Prompt
+
+An example prompt could be "Create a 555 timer with a blinking LED".
