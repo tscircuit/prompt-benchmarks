@@ -18,3 +18,20 @@ are run:
 2. Does the output produce the expected circuit?
 
 The benchmark shows the percentage of samples that pass (1) and (2)
+
+## Running the Benchmark Suite
+
+To run the benchmark suite, follow these steps:
+
+1. Ensure you have the necessary dependencies installed.
+2. Run the benchmark suite using the following command:
+
+```sh
+bun run scripts/run-benchmarks.ts
+```
+
+This will execute the AI against the test suite defined in `benchmarks/problems.toml` and generate a report in `benchmarks/results.md`.
+
+## Interpreting the Results
+
+The results of the benchmark suite will be reported in `benchmarks/results.md`. Each problem will be listed along with the questions and the AI's responses. The score for each problem will indicate the accuracy of the AI's answers. A higher score means better accuracy.
