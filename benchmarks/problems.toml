@@ -1,0 +1,54 @@
+[[problems]]
+prompt = """
+Create a 555 timer with a blinking LED.
+"""
+questions = [
+    { text = "The circuit includes a 555 timer IC", answer = true },
+    { text = "The LED blinks at a frequency of 1 Hz", answer = true },
+    { text = "The circuit uses a resistor and capacitor to set the timing", answer = true },
+    { text = "The LED is connected directly to the 555 timer output", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a simple LED driver circuit using a transistor and a current-limiting resistor.
+"""
+questions = [
+    { text = "The circuit includes a transistor", answer = true },
+    { text = "There is a current-limiting resistor for the LED", answer = true },
+    { text = "The LED brightness can be controlled by the transistor's base current", answer = true },
+    { text = "The circuit requires an operational amplifier", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a basic RC low-pass filter circuit with a cutoff frequency of 1 kHz.
+"""
+questions = [
+    { text = "The circuit includes a resistor and a capacitor", answer = true },
+    { text = "The cutoff frequency is 1 kHz", answer = true },
+    { text = "The circuit attenuates high-frequency signals", answer = true },
+    { text = "The circuit requires an inductor", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a simple LED driver circuit using a transistor and a current-limiting resistor.
+"""
+questions = [
+    { text = "The circuit includes a transistor", answer = true },
+    { text = "There is a current-limiting resistor for the LED", answer = true },
+    { text = "The LED brightness can be controlled by the transistor's base current", answer = true },
+    { text = "The circuit requires an operational amplifier", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a basic astable multivibrator circuit using two transistors to generate a square wave output.
+"""
+questions = [
+    { text = "The circuit uses two transistors", answer = true },
+    { text = "The output is a square wave", answer = true },
+    { text = "The circuit includes capacitors for timing", answer = true },
+    { text = "The circuit requires an external clock signal", answer = false }
+]
