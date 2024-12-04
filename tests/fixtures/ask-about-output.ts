@@ -5,7 +5,7 @@ export const askAboutOutput = async (
   question: string,
 ): Promise<boolean> => {
   const completion = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20240620",
+    model: "claude-3-5-haiku-20241022",
     max_tokens: 1024,
     system: `
 Please output YES or NO about the user's question.

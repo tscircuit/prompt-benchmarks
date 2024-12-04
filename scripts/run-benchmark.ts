@@ -37,7 +37,7 @@ const runAI = async (prompt: string): Promise<string> => {
     availableImports: {}
   }) + "\n\n" + prompt;
   const completion = await anthropic.messages.create({
-    model: 'claude-3-5-sonnet-20240620',
+    model: 'claude-3-5-haiku-20241022',
     max_tokens: 1024,
     system: "You are an expert in electronic circuit design and tscircuit.",
     messages: [
