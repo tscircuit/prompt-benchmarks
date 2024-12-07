@@ -52,6 +52,7 @@ pinrow10
 tssop20_p0.5mm
 sot23
 
+
 ### Notes
 
 - Any component may have a pcbX and/or a pcbY representing the center of the
@@ -80,10 +81,9 @@ Examples:
 <trace from=".U1 .D3" to=".U1 .GND" />
 <trace from=".U1 .D2" to="net.VCC" />
 
-${
-  !availableImports
-    ? ""
-    : `### Importing Components
+${!availableImports
+      ? ""
+      : `### Importing Components
 
 You can import a variety of components from the tscircuit registry. tscircuit
 registry components are always prefixed with \`@tsci/\`. Make sure to include
@@ -93,22 +93,21 @@ If you are not told explicitly that an import exists, do not import it.
 
 #### Available Imports
 
-${
-  !availableImports
-    ? "There are no available imports."
-    : Object.entries(availableImports)
-        .map(([name, description]) =>
-          `
+${!availableImports
+        ? "There are no available imports."
+        : Object.entries(availableImports)
+          .map(([name, description]) =>
+            `
 ##### \`${name}\`
 
 ${description}
 
 `.trim(),
-        )
-        .join("\n")
-}
+          )
+          .join("\n")
+      }
 `
-}
+    }
 
 ### Quirks
 
