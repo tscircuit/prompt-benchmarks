@@ -59,13 +59,13 @@ for (const problem of problems) {
         outputType: 'board',
         preSuppliedImports: {},
       });
-      return problem.questions.map(question => ({ input: { code: evaluation.success ? code : null, question: question.text }, expected: question.answer }));
+      return problem.questions.map(question => ({ input: { code: evaluation.success ? code : null, question: question.text }, expected: question.answer.toString() }));
     },
     task: async (input) => {
       if (!input.code)
-        return undefined
+        return ""
       const answer = await askAboutOutput(input.code, input.question);
-      return answer;
+      return answer.toString();
     },
     scorers: [Levenshtein],
   });
