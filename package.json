@@ -9,7 +9,9 @@
   "author": "Severin Ibarluzea",
   "scripts": {
     "build": "tsup-node lib/index.ts lib/code-runner/index.ts lib/code-runner-utils/index.ts --format esm --dts",
-    "test": "bun test --timeout 60000"
+    "test": "bun test --timeout 60000",
+    "eval": "evalite",
+    "eval:watch": "evalite watch"
   },
   "exports": {
     "./code-runner": "./dist/code-runner/index.js",
@@ -20,15 +22,19 @@
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.31.0",
     "@biomejs/biome": "^1.9.3",
-    "@tscircuit/core": "^0.0.153",
+    "@tscircuit/core": "^0.0.218",
     "@types/babel__standalone": "^7.1.7",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
     "@types/react": "^18.3.11",
     "@typescript/ata": "^0.9.7",
     "@typescript/vfs": "^1.6.0",
+    "autoevals": "^0.0.108",
+    "evalite": "^0.3.0",
     "react": "^18.3.1",
-    "tsup": "^8.3.0"
+    "tsup": "^8.3.0",
+    "vite": "^6.0.3",
+    "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -37,6 +43,7 @@
     "@babel/standalone": "^7.25.7",
     "@tscircuit/featured-snippets": "^0.0.1",
     "debug": "^4.3.7",
+    "dotenv": "^16.4.7",
     "extract-codefence": "^0.0.4",
     "toml": "^3.0.0"
   }
