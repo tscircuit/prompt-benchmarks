@@ -11,7 +11,8 @@
     "build": "tsup-node lib/index.ts lib/code-runner/index.ts lib/code-runner-utils/index.ts --format esm --dts",
     "test": "bun test --timeout 60000",
     "eval": "evalite",
-    "eval:watch": "evalite watch"
+    "eval:watch": "evalite watch",
+    "format": "biome format . --write"
   },
   "exports": {
     "./code-runner": "./dist/code-runner/index.js",
@@ -30,7 +31,7 @@
     "@typescript/ata": "^0.9.7",
     "@typescript/vfs": "^1.6.0",
     "autoevals": "^0.0.108",
-    "evalite": "^0.3.0",
+    "evalite": "^0.5.3",
     "react": "^18.3.1",
     "tsup": "^8.3.0",
     "vite": "^6.0.3",
