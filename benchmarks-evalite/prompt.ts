@@ -1,7 +1,6 @@
-export const createCircuitBoard1Template = ({
-  currentCode = "",
-  availableImports,
-}: { currentCode?: string; availableImports?: Record<string, string> }) =>
+export const createPrompt = ({
+  requestedCircuit,
+}: { requestedCircuit: string }) =>
   `
 Please create a circuit board in tscircuit with the user-provided description.
 
@@ -81,35 +80,13 @@ Examples:
 <trace from=".U1 .D3" to=".U1 .GND" />
 <trace from=".U1 .D2" to="net.VCC" />
 
-${
-  !availableImports
-    ? ""
-    : `### Importing Components
+### Importing Components
 
 You can import a variety of components from the tscircuit registry. tscircuit
 registry components are always prefixed with \`@tsci/\`. Make sure to include
 your imports at the top of the codefence.
 
 If you are not told explicitly that an import exists, do not import it.
-
-#### Available Imports
-
-${
-  !availableImports
-    ? "There are no available imports."
-    : Object.entries(availableImports)
-        .map(([name, description]) =>
-          `
-##### \`${name}\`
-
-${description}
-
-`.trim(),
-        )
-        .join("\n")
-}
-`
-}
 
 ### Quirks
 
@@ -131,7 +108,7 @@ export const MyLed = () => (
 )
 \`\`\`
 
-<current_code>
-${currentCode}
-</current_code>
+### Requested Circuit
+
+${requestedCircuit}
 `.trim()

@@ -2,6 +2,7 @@
 prompt = """
 Create a 555 timer with a blinking LED.
 """
+title = "Blinking LED"
 questions = [
     { text = "The circuit includes a 555 timer IC", answer = true },
     { text = "The LED blinks at a frequency of 1 Hz", answer = true },
@@ -13,6 +14,7 @@ questions = [
 prompt = """
 Design a simple LED driver circuit using a transistor and a current-limiting resistor.
 """
+title = "LED Transistor Driver"
 questions = [
     { text = "The circuit includes a transistor", answer = true },
     { text = "There is a current-limiting resistor for the LED", answer = true },
@@ -24,6 +26,7 @@ questions = [
 prompt = """
 Create a basic RC low-pass filter circuit with a cutoff frequency of 1 kHz.
 """
+title = "RC Low-Pass Filter"
 questions = [
     { text = "The circuit includes a resistor and a capacitor", answer = true },
     { text = "The cutoff frequency is 1 kHz", answer = true },
@@ -33,19 +36,9 @@ questions = [
 
 [[problems]]
 prompt = """
-Design a simple LED driver circuit using a transistor and a current-limiting resistor.
-"""
-questions = [
-    { text = "The circuit includes a transistor", answer = true },
-    { text = "There is a current-limiting resistor for the LED", answer = true },
-    { text = "The LED brightness can be controlled by the transistor's base current", answer = true },
-    { text = "The circuit requires an operational amplifier", answer = false }
-]
-
-[[problems]]
-prompt = """
 Create a basic astable multivibrator circuit using two transistors to generate a square wave output.
 """
+title = "Astable Multivibrator"
 questions = [
     { text = "The circuit uses two transistors", answer = true },
     { text = "The output is a square wave", answer = true },
@@ -57,6 +50,7 @@ questions = [
 prompt = """
 Design a voltage divider circuit to convert a 12V input to a 5V output.
 """
+title = "Voltage Divider"
 questions = [
  { text = "The circuit uses two resistors", answer = true },
  { text = "The output voltage is 5V", answer = true },
@@ -68,6 +62,7 @@ questions = [
 prompt = """
 Create a simple audio amplifier circuit using a single transistor.
 """
+title = "Single Transistor Audio Amplifier"
 questions = [
  { text = "The circuit includes a transistor", answer = true },
  { text = "There is a coupling capacitor at the input", answer = true },
@@ -79,6 +74,7 @@ questions = [
 prompt = """
 Design a basic full-wave bridge rectifier circuit to convert AC to DC.
 """
+title = "Bridge Rectifier"
 questions = [
  { text = "The circuit uses four diodes", answer = true },
  { text = "The output is pulsating DC", answer = true },
@@ -90,6 +86,7 @@ questions = [
 prompt = """
 Create a simple light-sensitive circuit using a photoresistor (LDR) to control an LED.
 """
+title = "Light-Sensitive LED Circuit"
 questions = [
  { text = "The circuit includes a photoresistor", answer = true },
  { text = "The LED brightness changes with ambient light", answer = true },
@@ -101,9 +98,142 @@ questions = [
 prompt = """
 Design a basic Wien bridge oscillator circuit to generate a sine wave output.
 """
+title = "Wien Bridge Oscillator"
 questions = [
  { text = "The circuit uses an operational amplifier", answer = true },
  { text = "The output is a sine wave", answer = true },
  { text = "The circuit includes resistors and capacitors for frequency determination", answer = true },
  { text = "The circuit requires an external clock signal", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a basic voltage regulator circuit using a zener diode to maintain a constant 5.1V output.
+"""
+title = "Zener Voltage Regulator"
+questions = [
+    { text = "The circuit includes a zener diode", answer = true },
+    { text = "There is a current-limiting resistor", answer = true },
+    { text = "The output voltage remains stable at 5.1V", answer = true },
+    { text = "The circuit requires an integrated circuit regulator", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a Darlington pair transistor circuit for high current gain amplification.
+"""
+title = "Darlington Pair Amplifier"
+questions = [
+    { text = "The circuit uses two transistors in cascade", answer = true },
+    { text = "The total current gain is the product of individual transistor gains", answer = true },
+    { text = "The circuit provides higher current amplification than a single transistor", answer = true },
+    { text = "The circuit requires negative feedback", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a push-pull amplifier circuit using complementary transistors (NPN and PNP).
+"""
+title = "Push-Pull Amplifier"
+questions = [
+    { text = "The circuit uses both NPN and PNP transistors", answer = true },
+    { text = "Each transistor handles one half of the signal cycle", answer = true },
+    { text = "The circuit can drive higher power loads", answer = true },
+    { text = "The circuit requires only one type of transistor", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a Schmitt trigger circuit using an operational amplifier for noise immunity.
+"""
+title = "Schmitt Trigger"
+questions = [
+    { text = "The circuit has hysteresis in its switching behavior", answer = true },
+    { text = "The circuit uses positive feedback", answer = true },
+    { text = "The output has clean transitions between states", answer = true },
+    { text = "The circuit requires multiple op-amps", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a current mirror circuit using matched transistors.
+"""
+title = "Current Mirror"
+questions = [
+    { text = "The circuit copies a reference current to an output", answer = true },
+    { text = "The transistors should be matched for better accuracy", answer = true },
+    { text = "The circuit provides a constant current source", answer = true },
+    { text = "The circuit requires resistor matching", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a crystal oscillator circuit for precise frequency generation.
+"""
+title = "Crystal Oscillator"
+questions = [
+    { text = "The circuit uses a quartz crystal", answer = true },
+    { text = "The frequency is very stable", answer = true },
+    { text = "The circuit provides feedback to maintain oscillation", answer = true },
+    { text = "The frequency can be easily varied", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a differential amplifier circuit using matched transistors.
+"""
+title = "Differential Amplifier"
+questions = [
+    { text = "The circuit amplifies the difference between two inputs", answer = true },
+    { text = "Common-mode signals are rejected", answer = true },
+    { text = "The circuit requires a constant current source", answer = true },
+    { text = "The circuit works with single-ended input", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a class A amplifier circuit with proper biasing.
+"""
+title = "Class A Amplifier"
+questions = [
+    { text = "The transistor conducts for the entire input cycle", answer = true },
+    { text = "The circuit requires proper DC bias", answer = true },
+    { text = "The output is highly linear", answer = true },
+    { text = "The circuit is highly efficient", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a bootstrap circuit for improved input impedance in an amplifier.
+"""
+title = "Bootstrap Circuit"
+questions = [
+    { text = "The circuit uses positive feedback", answer = true },
+    { text = "The input impedance is increased", answer = true },
+    { text = "The circuit maintains linear operation", answer = true },
+    { text = "The circuit reduces gain", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a Colpitts oscillator circuit using LC tank circuit.
+"""
+title = "Colpitts Oscillator"
+questions = [
+    { text = "The circuit uses two capacitors and an inductor", answer = true },
+    { text = "The frequency is determined by LC components", answer = true },
+    { text = "The circuit provides sustained oscillations", answer = true },
+    { text = "The circuit requires external timing", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a charge pump circuit to generate a higher voltage from a lower voltage source.
+"""
+title = "Charge Pump"
+questions = [
+    { text = "The circuit uses capacitors and diodes", answer = true },
+    { text = "The output voltage is higher than input voltage", answer = true },
+    { text = "The circuit requires clock switching", answer = true },
+    { text = "The circuit requires a transformer", answer = false }
 ]
