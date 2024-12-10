@@ -6,7 +6,7 @@ import { safeEvaluateCode } from "../lib/code-runner/safe-evaluate-code"
 import { askAboutOutput } from "../tests/fixtures/ask-about-output"
 import { createPrompt } from "./prompt"
 import { evalite } from "evalite"
-import { Levenshtein, ExactMatch } from "autoevals"
+import { ExactMatch } from "autoevals"
 
 interface Problem {
   prompt: string
@@ -71,6 +71,6 @@ for (const problem of problems) {
       const answer = await askAboutOutput(input.code, input.question)
       return answer.toString()
     },
-    scorers: [Levenshtein, ExactMatch],
+    scorers: [ExactMatch],
   })
 }
