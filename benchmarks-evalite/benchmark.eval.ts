@@ -71,6 +71,22 @@ for (const problem of problems) {
       const answer = await askAboutOutput(input.code, input.question)
       return answer.toString()
     },
+    experimental_customColumns: async (result) => {
+      return [
+        {
+          label: "Question",
+          value: result.input.question,
+        },
+        {
+          label: "Output",
+          value: result.output,
+        },
+        {
+          label: "Expected",
+          value: result.expected,
+        },
+      ]
+    },
     scorers: [ExactMatch],
   })
 }
