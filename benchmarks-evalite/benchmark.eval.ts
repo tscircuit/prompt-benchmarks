@@ -1,5 +1,5 @@
-import fs from "fs"
-import path from "path"
+import fs from "node:fs"
+import path from "node:path"
 import toml from "toml"
 import { anthropic } from "../lib/code-runner/anthropic"
 import { safeEvaluateCode } from "../lib/code-runner/safe-evaluate-code"
@@ -70,6 +70,22 @@ for (const problem of problems) {
       if (!input.code) return ""
       const answer = await askAboutOutput(input.code, input.question)
       return answer.toString()
+    },
+    experimental_customColumns: async (result) => {
+      return [
+        {
+          label: "Question",
+          value: result.input.question,
+        },
+        {
+          label: "Output",
+          value: result.output,
+        },
+        {
+          label: "Expected",
+          value: result.expected,
+        },
+      ]
     },
     scorers: [ExactMatch],
   })
