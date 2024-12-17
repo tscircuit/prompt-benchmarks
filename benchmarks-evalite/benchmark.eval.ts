@@ -1,5 +1,5 @@
-import fs from "fs"
-import path from "path"
+import fs from "node:fs"
+import path from "node:path"
 import toml from "toml"
 import { anthropic } from "../lib/code-runner/anthropic"
 import { safeEvaluateCode } from "../lib/code-runner/safe-evaluate-code"
