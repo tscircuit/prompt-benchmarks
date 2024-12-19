@@ -3,10 +3,10 @@ import path from "node:path"
 import toml from "toml"
 import { anthropic } from "../lib/code-runner/anthropic"
 import { safeEvaluateCode } from "../lib/code-runner/safe-evaluate-code"
-import { askAboutOutput } from "../tests/fixtures/ask-about-output"
 import { createPrompt } from "./prompt"
 import { evalite } from "evalite"
-import { ExactMatch } from "autoevals"
+import { CircuitScorer } from "./scorers/circuit-scorer"
+import { askAboutOutput } from "tests/fixtures/ask-about-output"
 
 interface Problem {
   prompt: string
@@ -45,48 +45,61 @@ const runAI = async (prompt: string): Promise<string> => {
   return (completion as any).content[0]?.text || ""
 }
 
-const problems = loadProblems(path.join(__dirname, "./problems.toml"))
-let problemNumber = 0
-for (const problem of problems) {
-  problemNumber++
-  evalite(problem.title, {
-    data: async () => {
-      const aiResponse = await runAI(problem.prompt)
-      const codeMatch = aiResponse.match(/```tsx\s*([\s\S]*?)\s*```/)
-      const code = codeMatch ? codeMatch[1].trim() : ""
-      const evaluation = safeEvaluateCode(code, {
-        outputType: "board",
-        preSuppliedImports: {},
-      })
-      return problem.questions.map((question) => ({
-        input: {
-          code: evaluation.success ? code : null,
-          question: question.text,
-        },
-        expected: question.answer.toString(),
-      }))
-    },
-    task: async (input) => {
-      if (!input.code) return ""
-      const answer = await askAboutOutput(input.code, input.question)
-      return answer.toString()
-    },
-    experimental_customColumns: async (result) => {
-      return [
-        {
-          label: "Question",
-          value: result.input.question,
-        },
-        {
-          label: "Output",
-          value: result.output,
-        },
-        {
-          label: "Expected",
-          value: result.expected,
-        },
-      ]
-    },
-    scorers: [ExactMatch],
-  })
-}
+evalite("Electronics Engineer", {
+  data: () => {
+    const problems = loadProblems(path.join(__dirname, "./problems.toml"))
+
+    return problems.map((problem) => ({
+      input: {
+        prompt: problem.prompt,
+        questions: problem.questions,
+      },
+    }))
+  },
+  task: async (input) => {
+    const aiResponse = await runAI(input.prompt)
+    const codeMatch = aiResponse.match(/```tsx\s*([\s\S]*?)\s*```/)
+    const code = codeMatch ? codeMatch[1].trim() : ""
+    const evaluation = safeEvaluateCode(code, {
+      outputType: "board",
+      preSuppliedImports: {},
+    })
+
+    const output: {
+      results: { result: boolean; expected: boolean }[]
+      code: string
+    } = { results: [], code: "" }
+
+    if (evaluation.success) {
+      output.code = code
+      for (const question of input.questions) {
+        output.results.push({
+          result: await askAboutOutput(code, question.text),
+          expected: question.answer,
+        })
+      }
+    }
+
+    return output
+  },
+  experimental_customColumns: async (result) => {
+    return [
+      {
+        label: "Prompt",
+        value: result.input.prompt,
+      },
+      {
+        label: "Code",
+        value: result.output.code,
+      },
+      {
+        label: "Result",
+        value:
+          result.output.results.length > 0
+            ? "Circuit passed"
+            : "Circuit failed",
+      },
+    ]
+  },
+  scorers: [CircuitScorer],
+})
