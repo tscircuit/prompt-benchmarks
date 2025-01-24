@@ -29,15 +29,19 @@ const loadProblems = (filePath: string): Problem[] => {
 }
 
 const runAI = async (prompt: string): Promise<string> => {
-  const initialPrompt = createPrompt({ requestedCircuit: prompt })
+  const systemPrompt = await createPrompt()
   const completion = await anthropic.messages.create({
     model: "claude-3-5-haiku-20241022",
-    max_tokens: 1024,
-    system: "You are an expert in electronic circuit design and tscircuit.",
+    max_tokens: 2048,
+    system: systemPrompt,
     messages: [
       {
+        role: "assistant",
+        content: "You must abide by the rules you have set for yourself",
+      },
+      {
         role: "user",
-        content: initialPrompt,
+        content: prompt,
       },
     ],
   })
