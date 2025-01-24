@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk"
 import * as React from "react"
-import { Circuit } from "@tscircuit/core"
+import { RootCircuit } from "@tscircuit/core"
 import { safeTranspileCode } from "./transpile-code"
 import Debug from "debug"
 import type { CodeRunnerContext } from "./code-runner-context"
@@ -13,7 +13,7 @@ export const safeEvaluateCode = (
 ):
   | {
       success: true
-      circuit: Circuit
+      circuit: RootCircuit
       circuitJson: any
       errorStage?: undefined
       error?: undefined
@@ -118,7 +118,7 @@ export const safeEvaluateCode = (
     }
   }
 
-  const circuit = new Circuit()
+  const circuit = new RootCircuit()
   try {
     if (outputType === "board") {
       circuit.add(<UserElm />)
