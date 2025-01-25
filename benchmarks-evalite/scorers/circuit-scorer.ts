@@ -8,13 +8,14 @@ export const CircuitScorer = createScorer<
       answer: boolean
     }[]
   },
-  {
-    results: {
-      result: boolean
-      expected: boolean
-    }[]
-    code: string
-  }
+  | {
+      results: {
+        result: boolean
+        expected: boolean
+      }[]
+      code: string
+    }
+  | string
 >({
   name: "circuit_scorer",
   description: "Evaluates circuit code for presence of key components",
@@ -22,6 +23,7 @@ export const CircuitScorer = createScorer<
     if (!output) {
       return { score: 0 }
     }
+    if (typeof output === "string") return { score: 0 }
 
     const score = output.results.reduce((acc, { result, expected }) => {
       return acc + (result === expected ? 0.25 : 0)

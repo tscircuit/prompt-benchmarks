@@ -4,8 +4,6 @@ import {
   fp,
 } from "@tscircuit/footprinter"
 
-import { writeFile } from "node:fs"
-
 async function fetchFileContent(url: string): Promise<string> {
   try {
     const response = await fetch(url)
@@ -45,7 +43,6 @@ export const createPrompt = async () => {
     .filter((line) => !line.startsWith("#"))
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
-  writeFile("propsDoc.md", cleanedPropsDoc, { encoding: "utf-8" }, (err) => {})
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.

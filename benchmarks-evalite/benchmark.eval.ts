@@ -82,11 +82,26 @@ evalite("Electronics Engineer", {
           expected: question.answer,
         })
       }
+      return output
     }
-
-    return output
+    return `${evaluation.error}\nCode: ${code}`
   },
   experimental_customColumns: async (result) => {
+    if (typeof result.output === "string")
+      return [
+        {
+          label: "Prompt",
+          value: result.input.prompt,
+        },
+        {
+          label: "Code",
+          value: result.output,
+        },
+        {
+          label: "Result",
+          value: "Circuit failed",
+        },
+      ]
     return [
       {
         label: "Prompt",
