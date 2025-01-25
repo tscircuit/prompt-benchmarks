@@ -1,4 +1,4 @@
-import fs from "node:fs"
+import fs, { readdirSync } from "node:fs"
 import path from "node:path"
 import toml from "toml"
 import { anthropic } from "../lib/code-runner/anthropic"
@@ -8,11 +8,31 @@ import { evalite } from "evalite"
 import { CircuitScorer } from "./scorers/circuit-scorer"
 import { askAboutOutput } from "tests/fixtures/ask-about-output"
 
+const savePrompt = (prompt: string, fileName: string) => {
+  const promptsDir = path.join(__dirname, "./prompts")
+
+  if (!fs.existsSync(promptsDir)) {
+    fs.mkdirSync(promptsDir, { recursive: true })
+  }
+
+  const files = readdirSync(promptsDir)
+    .filter((f) => f.startsWith("prompt-"))
+    .sort()
+
+  if (files.length >= 10) {
+    fs.unlinkSync(path.join(promptsDir, files[0]))
+  }
+
+  fs.writeFileSync(path.join(promptsDir, fileName), prompt)
+}
+
 interface Problem {
   prompt: string
   title: string
   questions: { text: string; answer: boolean }[]
 }
+
+let systemPrompt = ""
 
 const loadProblems = (filePath: string): Problem[] => {
   const tomlContent = fs.readFileSync(filePath, "utf-8")
@@ -29,7 +49,6 @@ const loadProblems = (filePath: string): Problem[] => {
 }
 
 const runAI = async (prompt: string): Promise<string> => {
-  const systemPrompt = await createPrompt()
   const completion = await anthropic.messages.create({
     model: "claude-3-5-haiku-20241022",
     max_tokens: 2048,
@@ -50,12 +69,18 @@ const runAI = async (prompt: string): Promise<string> => {
 }
 
 evalite("Electronics Engineer", {
-  data: () => {
+  data: async () => {
     const problems = loadProblems(path.join(__dirname, "./problems.toml"))
+    systemPrompt = await createPrompt()
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+    const promptFileName = `prompt-${timestamp}.txt`
+    savePrompt(systemPrompt, promptFileName)
 
     return problems.map((problem) => ({
       input: {
         prompt: problem.prompt,
+        promptFileName,
         questions: problem.questions,
       },
     }))
