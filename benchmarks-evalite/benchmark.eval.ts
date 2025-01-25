@@ -64,6 +64,8 @@ evalite("Electronics Engineer", {
     const aiResponse = await runAI(input.prompt)
     const codeMatch = aiResponse.match(/```tsx\s*([\s\S]*?)\s*```/)
     const code = codeMatch ? codeMatch[1].trim() : ""
+    const codeBlockMatch = aiResponse.match(/```tsx[\s\S]*?```/)
+    const codeBlock = codeBlockMatch ? codeBlockMatch[0] : ""
     const evaluation = safeEvaluateCode(code, {
       outputType: "board",
       preSuppliedImports: {},
@@ -75,7 +77,7 @@ evalite("Electronics Engineer", {
     } = { results: [], code: "" }
 
     if (evaluation.success) {
-      output.code = code
+      output.code = codeBlock
       for (const question of input.questions) {
         output.results.push({
           result: await askAboutOutput(code, question.text),
@@ -84,7 +86,7 @@ evalite("Electronics Engineer", {
       }
       return output
     }
-    return `${evaluation.error}\nCode: ${code}`
+    return `${evaluation.error}. Code:\n${codeBlock}`
   },
   experimental_customColumns: async (result) => {
     if (typeof result.output === "string")
