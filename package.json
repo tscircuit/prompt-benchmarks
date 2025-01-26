@@ -12,6 +12,7 @@
     "test": "bun test --timeout 60000",
     "eval": "evalite",
     "eval:watch": "evalite watch",
+    "start": "bun run eval:watch",
     "format": "biome format . --write"
   },
   "exports": {

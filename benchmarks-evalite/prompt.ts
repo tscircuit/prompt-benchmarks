@@ -136,9 +136,9 @@ ${cleanedPropsDoc}
      <smtpad name="4" shape="rect" width="1mm" height="2mm" pcbX="3mm" pcbY="2mm" />
 
      // Silkscreen markings for the chip outline
-     <silkscreen-rect width="8mm" height="6mm" pcbX="0" pcbY="0" />
-     <silkscreen-circle radius="0.3mm" pcbX="-4mm" pcbY="3mm" /> // Pin 1 indicator
-     <silkscreen-text text="U" pcbX="0" pcbY="0" fontSize="1mm" />
+     <silkscreenrect width="8mm" height="6mm" pcbX="0" pcbY="0" />
+     <silkscreencircle radius="0.3mm" pcbX="-4mm" pcbY="3mm" /> // Pin 1 indicator
+     <silkscreentext text="U" pcbX="0" pcbY="0" fontSize="1mm" />
    </footprint>
  )
 
@@ -147,7 +147,7 @@ ${cleanedPropsDoc}
    <footprint originalLayer="top">
      <smtpad name="1" shape="rect" width="0.8mm" height="0.95mm" pcbX="-0.75mm" pcbY="0" />
      <smtpad name="2" shape="rect" width="0.8mm" height="0.95mm" pcbX="0.75mm" pcbY="0" />
-     <silkscreen-rect width="1.6mm" height="0.8mm" pcbX="0" pcbY="0" />
+     <silkscreenrect width="1.6mm" height="0.8mm" pcbX="0" pcbY="0" />
    </footprint>
  )
                                                                                                                                                    
