@@ -75,7 +75,7 @@ Here's an overview of the tscircuit API:
 <trace from=".U1 > .D3" to=".U1 > .GND" />
 <trace from=".U1 > .D2" to="net.VCC" />
 <resistor pullupFor=".U1 .D1" pullupTo="net.VCC" footprint="axial_p0.2in" />
-<resistor decouplingFor=".U1 .VCC" decouplingTo="net.GND" footprint="axial_p5.08mm" />
+<resistor decouplingFor=".U1 .pin1" decouplingTo="net.GND" footprint="axial_p5.08mm" />
 
 ### footprint strings
 
@@ -176,7 +176,7 @@ ${cleanedPropsDoc}
          footprint="0402"
          pcbX="12mm"
          pcbY="10mm"
-         decouplingFor=".U1 .VCC"
+         decouplingFor=".U1 .pin1"
          decouplingTo="net.GND"
        />
      </group>
@@ -236,7 +236,7 @@ ${cleanedPropsDoc}
        name={capName}
        capacitance={capValue}
        footprint="0402"
-       decouplingFor={\`\${chipRef} .VCC\`}
+       decouplingFor={\`\${chipRef} .pin1\`}
        decouplingTo="net.GND"
      />
      <constraint
@@ -265,7 +265,11 @@ ${cleanedPropsDoc}
 
 ### RULES 
 
-- Component names must be in camel case
+- decouplingFor must contain the selector for the component and the pin(eg. ".U1 .pin1", ".T1 .pin1")
+- Never pass the component name alone as a selector for decouplingFor, always use the component name reference and the pin number
+- Don't use hole or port components, always connect to the component pins
+- Don't use inline comments which are comments in the same line as components, they are forbidden
+- Port components must be children to a chip component.
 - Never use components in the "Unsupported components" list
 - Never use footprints in the "Unsupported footprints" list
 - Any component may have a pcbX and/or a pcbY representing the center of the
@@ -289,6 +293,7 @@ ${cleanedPropsDoc}
 - Don't specify autorouter; don't use the autorouter prop
 - Selectors for component pins must be of this format: ".U1 > .pin1" or ".U1 > .pin2" where U1 is the component name, and the pins must be numbers, so don't use names for pins but use pin1, pin2, pin3, pin4
 - And instead of ".T1 > .base" you do do ".T1 > .pin2"
+- "for" must have at least two selectors for constraints
 
 ### Trace Reference Syntax
 
