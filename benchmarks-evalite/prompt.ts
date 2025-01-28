@@ -120,9 +120,9 @@ ${cleanedPropsDoc}
 
 - Here is a list of unsupported components: 
 
-1- powerSource
-2- powerSourceSimple
-3- pinHeader
+1- powersource
+2- powersourcesimple
+3- pinheader
 
 - Here are examples of how you can take advantage of those props: 
 
