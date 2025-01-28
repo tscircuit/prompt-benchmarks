@@ -69,6 +69,7 @@ const runAI = async (prompt: string): Promise<string> => {
 }
 
 evalite("Electronics Engineer", {
+  timeout: 40000,
   data: async () => {
     const problems = loadProblems(path.join(__dirname, "./problems.toml"))
     systemPrompt = await createPrompt()
