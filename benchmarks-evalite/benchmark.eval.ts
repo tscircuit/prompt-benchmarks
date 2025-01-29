@@ -70,7 +70,7 @@ const runAI = async (prompt: string): Promise<string> => {
 
 evalite("Electronics Engineer", {
   data: async () => {
-    const problems = loadProblems(path.join(__dirname, "./problems.toml"))
+    const problems = loadProblems(path.join(__dirname, "./problems-2.toml"))
     systemPrompt = await createPrompt()
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
