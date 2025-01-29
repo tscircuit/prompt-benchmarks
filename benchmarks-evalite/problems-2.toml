@@ -1,0 +1,239 @@
+[[problems]]
+prompt = """
+Design a MOSFET H-bridge circuit for DC motor control with direction and speed control.
+"""
+title = "MOSFET H-Bridge"
+questions = [
+    { text = "The circuit uses four MOSFETs", answer = true },
+    { text = "The motor can rotate in both directions", answer = true },
+    { text = "PWM can be used for speed control", answer = true },
+    { text = "The circuit requires an external ADC", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a precision temperature sensor circuit using a thermistor with linearization.
+"""
+title = "Precision Temperature Sensor"
+questions = [
+    { text = "The circuit uses a thermistor", answer = true },
+    { text = "There is linearization compensation", answer = true },
+    { text = "The output voltage is proportional to temperature", answer = true },
+    { text = "The circuit requires digital processing", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design an active bandpass filter using op-amps with a center frequency of 1kHz.
+"""
+title = "Active Bandpass Filter"
+questions = [
+    { text = "The circuit uses operational amplifiers", answer = true },
+    { text = "The center frequency is 1kHz", answer = true },
+    { text = "Both high and low frequencies are attenuated", answer = true },
+    { text = "The circuit requires digital filtering", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a phase-locked loop (PLL) circuit for frequency synthesis.
+"""
+title = "PLL Frequency Synthesizer"
+questions = [
+    { text = "The circuit includes a phase detector", answer = true },
+    { text = "There is a voltage-controlled oscillator", answer = true },
+    { text = "The output frequency is locked to a reference", answer = true },
+    { text = "The circuit requires external memory", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a precision full-wave rectifier using op-amps.
+"""
+title = "Precision Rectifier"
+questions = [
+    { text = "The circuit uses operational amplifiers", answer = true },
+    { text = "Both positive and negative half-cycles are rectified", answer = true },
+    { text = "The circuit overcomes diode voltage drops", answer = true },
+    { text = "The circuit requires transformers", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a constant current source circuit using an op-amp and MOSFET.
+"""
+title = "Constant Current Source"
+questions = [
+    { text = "The circuit maintains constant current regardless of load", answer = true },
+    { text = "The current can be set by a reference voltage", answer = true },
+    { text = "The circuit uses negative feedback", answer = true },
+    { text = "The circuit requires multiple power supplies", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a sample and hold circuit using an op-amp and capacitor.
+"""
+title = "Sample and Hold"
+questions = [
+    { text = "The circuit can capture and hold an analog voltage", answer = true },
+    { text = "The circuit uses a switching element", answer = true },
+    { text = "A capacitor stores the sampled voltage", answer = true },
+    { text = "The circuit requires an ADC", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a voltage-to-frequency converter circuit.
+"""
+title = "Voltage to Frequency Converter"
+questions = [
+    { text = "The output frequency is proportional to input voltage", answer = true },
+    { text = "The circuit uses an integrator", answer = true },
+    { text = "The conversion is linear", answer = true },
+    { text = "The circuit requires external timing", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a precision peak detector circuit with reset capability.
+"""
+title = "Peak Detector"
+questions = [
+    { text = "The circuit can detect signal peaks", answer = true },
+    { text = "The peak value can be held", answer = true },
+    { text = "There is a reset mechanism", answer = true },
+    { text = "The circuit requires digital processing", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a variable gain amplifier circuit using an analog multiplier.
+"""
+title = "Variable Gain Amplifier"
+questions = [
+    { text = "The gain can be controlled by a voltage", answer = true },
+    { text = "The circuit maintains linearity", answer = true },
+    { text = "The gain control is continuous", answer = true },
+    { text = "The circuit requires digital control", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a precision voltage reference circuit using a bandgap reference.
+"""
+title = "Bandgap Reference"
+questions = [
+    { text = "The output voltage is temperature stable", answer = true },
+    { text = "The circuit uses bipolar transistors", answer = true },
+    { text = "The reference is independent of supply voltage", answer = true },
+    { text = "The circuit requires external calibration", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a current-to-voltage converter with high precision.
+"""
+title = "Current to Voltage Converter"
+questions = [
+    { text = "The output voltage is proportional to input current", answer = true },
+    { text = "The circuit uses virtual ground", answer = true },
+    { text = "The conversion is linear", answer = true },
+    { text = "The circuit requires multiple stages", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a logarithmic amplifier circuit using transistors.
+"""
+title = "Logarithmic Amplifier"
+questions = [
+    { text = "The output is proportional to log of input", answer = true },
+    { text = "The circuit uses transistor characteristics", answer = true },
+    { text = "The dynamic range is large", answer = true },
+    { text = "The circuit requires digital computation", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a precision window comparator circuit.
+"""
+title = "Window Comparator"
+questions = [
+    { text = "The circuit detects if signal is within voltage range", answer = true },
+    { text = "Two threshold levels can be set", answer = true },
+    { text = "The output indicates in-range condition", answer = true },
+    { text = "The circuit requires microcontroller", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design an instrumentation amplifier for sensor interfacing.
+"""
+title = "Instrumentation Amplifier"
+questions = [
+    { text = "The circuit has high common-mode rejection", answer = true },
+    { text = "The gain can be set with one resistor", answer = true },
+    { text = "The input impedance is very high", answer = true },
+    { text = "The circuit requires external calibration", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a precision current mirror with high output impedance.
+"""
+title = "High Output Impedance Current Mirror"
+questions = [
+    { text = "The output current matches reference current", answer = true },
+    { text = "The output impedance is enhanced", answer = true },
+    { text = "The circuit uses cascode configuration", answer = true },
+    { text = "The circuit requires external regulation", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a zero-crossing detector with noise immunity.
+"""
+title = "Zero Crossing Detector"
+questions = [
+    { text = "The circuit detects signal polarity changes", answer = true },
+    { text = "There is hysteresis for noise immunity", answer = true },
+    { text = "The output is digital compatible", answer = true },
+    { text = "The circuit requires external filtering", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a precision full-bridge strain gauge amplifier.
+"""
+title = "Strain Gauge Amplifier"
+questions = [
+    { text = "The circuit works with bridge sensors", answer = true },
+    { text = "There is offset compensation", answer = true },
+    { text = "The gain is precisely controlled", answer = true },
+    { text = "The circuit requires external ADC", answer = false }
+]
+
+[[problems]]
+prompt = """
+Design a precision phase shifter circuit using all-pass filter.
+"""
+title = "Phase Shifter"
+questions = [
+    { text = "The circuit can adjust signal phase", answer = true },
+    { text = "The amplitude remains constant", answer = true },
+    { text = "The phase shift is controllable", answer = true },
+    { text = "The circuit requires digital processing", answer = false }
+]
+
+[[problems]]
+prompt = """
+Create a programmable gain amplifier using analog switches.
+"""
+title = "Programmable Gain Amplifier"
+questions = [
+    { text = "The gain can be digitally selected", answer = true },
+    { text = "Multiple gain steps are available", answer = true },
+    { text = "The circuit maintains accuracy at all gains", answer = true },
+    { text = "The circuit requires continuous adjustment", answer = false }
+]
