@@ -45,7 +45,7 @@
     "@tscircuit/footprinter": "^0.0.102",
     "debug": "^4.3.7",
     "dotenv": "^16.4.7",
-    "evalite": "^0.8.2",
+    "evalite": "^0.8.3",
     "extract-codefence": "^0.0.4",
     "toml": "^3.0.0"
   }
