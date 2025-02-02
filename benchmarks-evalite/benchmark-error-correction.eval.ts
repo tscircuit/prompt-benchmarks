@@ -1,4 +1,4 @@
-import fs, { readdirSync } from "node:fs"
+import fs, { readdirSync, rmSync } from "node:fs"
 import path from "node:path"
 import toml from "toml"
 import { anthropic } from "../lib/code-runner/anthropic"
@@ -7,6 +7,44 @@ import { createPrompt } from "./prompt"
 import { evalite } from "evalite"
 import { CircuitScorer } from "./scorers/circuit-scorer"
 import { askAboutOutput } from "tests/fixtures/ask-about-output"
+
+const cleanupLogDirectory = () => {
+  const logsDir = path.join(__dirname, "./attempt-logs")
+  if (fs.existsSync(logsDir)) {
+    rmSync(logsDir, { recursive: true, force: true })
+  }
+  fs.mkdirSync(logsDir, { recursive: true })
+}
+
+const saveAttemptLog = (
+  fileName: string,
+  prompt: string,
+  code: string,
+  error: string,
+) => {
+  const logsDir = path.join(__dirname, "./attempt-logs")
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true })
+  }
+
+  const content = `# Attempt Log
+
+## Prompt
+${prompt}
+
+## Error
+\`\`\`
+${error}
+\`\`\`
+
+## Code
+\`\`\`tsx
+${code}
+\`\`\`
+`
+
+  fs.writeFileSync(path.join(logsDir, fileName), content)
+}
 
 const savePrompt = (prompt: string, fileName: string) => {
   const promptsDir = path.join(__dirname, "./prompts")
@@ -33,6 +71,7 @@ interface Problem {
 }
 
 let systemPrompt = ""
+let promptNumber = 0
 
 const loadProblems = (filePath: string): Problem[] => {
   const tomlContent = fs.readFileSync(filePath, "utf-8")
@@ -107,10 +146,12 @@ const runAI = async ({
 const errorCorrection = async ({
   attempts = 0,
   prompt,
+  promptNumber,
   previousAttempts = [],
 }: {
   attempts?: number
   prompt: string
+  promptNumber: number
   previousAttempts?: AttemptHistory[]
 }): Promise<{
   code: string
@@ -134,6 +175,12 @@ const errorCorrection = async ({
   const error = evaluation.error || ""
   attempts++
   previousAttempts.push({ code, error })
+  saveAttemptLog(
+    `prompt-${promptNumber}-attempt-${attempts}.md`,
+    prompt,
+    code,
+    error,
+  )
 
   if (attempts > 3) {
     return {
@@ -145,12 +192,14 @@ const errorCorrection = async ({
   return await errorCorrection({
     attempts,
     prompt,
+    promptNumber,
     previousAttempts,
   })
 }
 
 evalite("Reasoning Electronics Engineer", {
   data: async () => {
+    cleanupLogDirectory()
     const problems = loadProblems(path.join(__dirname, "./problems-1.toml"))
     systemPrompt = await createPrompt()
 
@@ -169,6 +218,7 @@ evalite("Reasoning Electronics Engineer", {
   task: async (input) => {
     const { code, codeBlock, error } = await errorCorrection({
       prompt: input.prompt,
+      promptNumber: ++promptNumber,
     })
 
     const output: {
