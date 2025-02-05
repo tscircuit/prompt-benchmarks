@@ -1,10 +1,10 @@
-import fs from "fs"
-import path from "path"
+import fs from "node:fs"
+import path from "node:path"
 import toml from "toml"
-import { anthropic } from "../lib/code-runner/anthropic"
+import { anthropic } from "../lib/ai/anthropic"
 import { safeEvaluateCode } from "../lib/code-runner/safe-evaluate-code"
 import { askAboutOutput } from "../tests/fixtures/ask-about-output"
-import { createCircuitBoard1Template } from "../prompt-templates/create-circuit-board1"
+import { createCircuitBoard1Template } from "../lib/prompt-templates/create-circuit-board1"
 
 interface Problem {
   prompt: string
@@ -32,13 +32,10 @@ const loadProblems = (filePath: string): Problem[] => {
 }
 
 const runAI = async (prompt: string): Promise<string> => {
-  const fullPrompt =
-    createCircuitBoard1Template({
-      currentCode: "",
-      availableImports: {},
-    }) +
-    "\n\n" +
-    prompt
+  const fullPrompt = `${createCircuitBoard1Template({
+    currentCode: "",
+    availableImports: {},
+  })}\n\n${prompt}`
   const completion = await anthropic.messages.create({
     model: "claude-3-5-haiku-20241022",
     max_tokens: 1024,
@@ -121,7 +118,7 @@ ${result.score}
 
 const main = async () => {
   const problems = loadProblems(
-    path.join(__dirname, "../benchmarks/problems.toml"),
+    path.join(__dirname, "../problem-sets/problems-1.toml"),
   )
   const results = await Promise.all(problems.map(gaugeAccuracy))
   outputResults(results, path.join(__dirname, "../benchmarks/results.md"))

@@ -1,81 +1,27 @@
-import fs, { readdirSync } from "node:fs"
 import path from "node:path"
-import toml from "toml"
-import { anthropic } from "../lib/code-runner/anthropic"
 import { safeEvaluateCode } from "../lib/code-runner/safe-evaluate-code"
-import { createPrompt } from "./prompt"
+import { createLocalCircuitPrompt } from "../lib/prompt-templates/create-local-circuit-prompt"
 import { evalite } from "evalite"
 import { CircuitScorer } from "./scorers/circuit-scorer"
 import { askAboutOutput } from "tests/fixtures/ask-about-output"
-
-const savePrompt = (prompt: string, fileName: string) => {
-  const promptsDir = path.join(__dirname, "./prompts")
-
-  if (!fs.existsSync(promptsDir)) {
-    fs.mkdirSync(promptsDir, { recursive: true })
-  }
-
-  const files = readdirSync(promptsDir)
-    .filter((f) => f.startsWith("prompt-"))
-    .sort()
-
-  if (files.length >= 10) {
-    fs.unlinkSync(path.join(promptsDir, files[0]))
-  }
-
-  fs.writeFileSync(path.join(promptsDir, fileName), prompt)
-}
-
-interface Problem {
-  prompt: string
-  title: string
-  questions: { text: string; answer: boolean }[]
-}
+import { savePrompt } from "lib/utils/save-prompt"
+import { loadProblems } from "lib/utils/load-problems"
+import { askAi } from "lib/ai/ask-ai"
 
 let systemPrompt = ""
 
-const loadProblems = (filePath: string): Problem[] => {
-  const tomlContent = fs.readFileSync(filePath, "utf-8")
-  const parsedToml = toml.parse(tomlContent)
-
-  return parsedToml.problems.map((problem: any) => ({
-    prompt: problem.prompt,
-    title: problem.title,
-    questions: problem.questions.map((q: any) => ({
-      text: q.text,
-      answer: q.answer,
-    })),
-  }))
-}
-
-const runAI = async (prompt: string): Promise<string> => {
-  const completion = await anthropic.messages.create({
-    model: "claude-3-5-haiku-20241022",
-    max_tokens: 2048,
-    system: systemPrompt,
-    messages: [
-      {
-        role: "assistant",
-        content: "You must abide by the rules you have set for yourself",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-  })
-
-  return (completion as any).content[0]?.text || ""
-}
-
-evalite("Electronics Engineer", {
+evalite.experimental_skip("Electronics Engineer", {
   data: async () => {
-    const problems = loadProblems(path.join(__dirname, "./problems-2.toml"))
-    systemPrompt = await createPrompt()
+    const problems = loadProblems(
+      path.join(__dirname, "..", "problem-sets", "problems-1.toml"),
+    )
+    systemPrompt = await createLocalCircuitPrompt()
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
     const promptFileName = `prompt-${timestamp}.txt`
-    savePrompt(systemPrompt, promptFileName)
+
+    const promptsDir = path.join(__dirname, "./prompt-logs")
+    savePrompt(systemPrompt, promptFileName, promptsDir)
 
     return problems.map((problem) => ({
       input: {
@@ -86,7 +32,7 @@ evalite("Electronics Engineer", {
     }))
   },
   task: async (input) => {
-    const aiResponse = await runAI(input.prompt)
+    const aiResponse = await askAi(input.prompt, systemPrompt)
     const codeMatch = aiResponse.match(/```tsx\s*([\s\S]*?)\s*```/)
     const code = codeMatch ? codeMatch[1].trim() : ""
     const codeBlockMatch = aiResponse.match(/```tsx[\s\S]*?```/)

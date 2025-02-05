@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import { runInitialPrompt } from "lib/code-runner/run-prompt"
-import { createCircuitBoard2Template } from "prompt-templates/create-circuit-board2"
+import { createCircuitBoard2Template } from "lib/prompt-templates/create-circuit-board2"
 import { boardSample1 } from "tests/board-samples/sample1"
 
 test("create-circuit-board1-prompt1", async () => {

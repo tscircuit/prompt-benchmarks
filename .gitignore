@@ -178,4 +178,4 @@ dist
 
 # Evalite
 evalite-report.jsonl
-benchmarks-evalite/attempt-logs/*
+benchmarks/attempt-logs/*

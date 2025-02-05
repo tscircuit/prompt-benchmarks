@@ -19,7 +19,7 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
-export const createPrompt = async () => {
+export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
   const imperialFootprintSizes = JSON.stringify(
