@@ -1,5 +1,5 @@
 import { createScorer } from "evalite"
-import { anthropic } from "lib/code-runner/anthropic"
+import { anthropic } from "lib/ai/anthropic"
 
 const getAiScore = async (prompt: string, code: string): Promise<number> => {
   const scoringPrompt = `You are an electronics expert. Please evaluate this circuit code and give it a score from 0 to 100 based on:       

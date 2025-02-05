@@ -9,6 +9,7 @@
   "author": "Severin Ibarluzea",
   "scripts": {
     "build": "tsup-node lib/index.ts lib/code-runner/index.ts lib/code-runner-utils/index.ts --format esm --dts",
+    "start": "bun run eval:watch",
     "test": "bun test --timeout 60000",
     "eval": "evalite",
     "eval:watch": "evalite watch",
@@ -45,7 +46,7 @@
     "@tscircuit/footprinter": "^0.0.102",
     "debug": "^4.3.7",
     "dotenv": "^16.4.7",
-    "evalite": "^0.8.3",
+    "evalite": "^0.8.4",
     "extract-codefence": "^0.0.4",
     "toml": "^3.0.0"
   }

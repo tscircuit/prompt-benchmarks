@@ -3,7 +3,7 @@ import * as React from "react"
 import { Circuit } from "@tscircuit/core"
 import { safeEvaluateCode } from "lib/code-runner/safe-evaluate-code"
 import { extractCodefence } from "extract-codefence"
-import { anthropic } from "lib/code-runner/anthropic"
+import { anthropic } from "lib/ai/anthropic"
 import Debug from "debug"
 import type {
   PromptAndRunnerContext,
