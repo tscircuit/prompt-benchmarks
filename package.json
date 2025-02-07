@@ -22,7 +22,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.31.0",
+    "@anthropic-ai/sdk": "^0.36.3",
     "@biomejs/biome": "^1.9.3",
     "@tscircuit/core": "^0.0.269",
     "@types/babel__standalone": "^7.1.7",
