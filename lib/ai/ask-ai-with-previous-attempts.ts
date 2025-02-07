@@ -58,13 +58,14 @@ export const askAiWithPreviousAttempts = async ({
       stream: true,
     })
     for await (const chunk of completionStream) {
+      const delta = (chunk as any).delta
       let textChunk = ""
       if (
         typeof chunk === "object" &&
-        chunk.delta &&
-        typeof chunk.delta.text === "string"
+        delta &&
+        typeof delta.text === "string"
       ) {
-        textChunk = chunk.delta.text
+        textChunk = delta.text
       } else if (typeof chunk === "string") {
         textChunk = chunk
       }
