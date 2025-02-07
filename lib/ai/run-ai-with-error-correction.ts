@@ -1,6 +1,33 @@
 import { safeEvaluateCode } from "lib/code-runner"
 import { askAiWithPreviousAttempts } from "./ask-ai-with-previous-attempts"
 import { saveAttemptLog } from "lib/utils/save-attempt"
+const createAttemptFile = ({
+  fileName,
+  prompt,
+  code,
+  error,
+}: {
+  fileName: string
+  prompt: string
+  code: string
+  error: string
+}) => {
+  return `# Attempt Log
+
+## Prompt
+${prompt}
+
+## Error
+\`\`\`
+${error}
+\`\`\`
+
+## Code
+\`\`\`tsx
+${code}
+\`\`\`
+`
+}
 
 interface AttemptHistory {
   code: string
@@ -15,14 +42,20 @@ export const runAiWithErrorCorrection = async ({
   prompt,
   promptNumber,
   previousAttempts = [],
+  onStream,
+  onVfsChanged,
+  vfs,
 }: {
   attempt?: number
-  logsDir: string
+  logsDir?: string
   maxAttempts: number
   prompt: string
   systemPrompt: string
   promptNumber: number
   previousAttempts?: AttemptHistory[]
+  onStream?: (chunk: string) => void
+  onVfsChanged?: () => void
+  vfs?: Record<string, string>
 }): Promise<{
   code: string
   codeBlock: string
@@ -32,6 +65,7 @@ export const runAiWithErrorCorrection = async ({
     prompt,
     systemPrompt,
     previousAttempts,
+    onStream,
   })
   const codeMatch = aiResponse.match(/```tsx\s*([\s\S]*?)\s*```/)
   const code = codeMatch ? codeMatch[1].trim() : ""
@@ -43,34 +77,59 @@ export const runAiWithErrorCorrection = async ({
   })
 
   if (evaluation.success) {
+    if (onStream) onStream("Local tscircuit circuit created")
     return { code, codeBlock, error: "" }
   }
 
   const error = evaluation.error || ""
-  attempt++
   previousAttempts.push({ code, error })
-  saveAttemptLog({
-    fileName: `prompt-${promptNumber}-attempt-${attempt}.md`,
-    prompt,
-    logsDir,
-    code,
-    error,
-  })
+  const attemptFileName = `prompt-${promptNumber}-attempt-${attempt}.md`
+  if (logsDir)
+    saveAttemptLog({
+      fileName: `prompt-${promptNumber}-attempt-${attempt}.md`,
+      prompt,
+      logsDir,
+      code,
+      error,
+    })
+  if (vfs) {
+    const attemptFileContent = createAttemptFile({
+      fileName: attemptFileName,
+      prompt,
+      code,
+      error,
+    })
+    vfs[attemptFileName] = attemptFileContent
+  }
+  attempt++
+  if (onVfsChanged) onVfsChanged()
 
   if (attempt >= maxAttempts) {
+    if (onStream)
+      onStream(
+        `Maximum attempts reached, Latest attempt circuit evalution error: ${previousAttempts[previousAttempts.length - 1].error || ""}`,
+      )
+
     return {
       code,
       codeBlock,
       error: previousAttempts[previousAttempts.length - 1].error || "",
     }
   }
+  if (onStream)
+    onStream(
+      `Circuit evaluation error: ${previousAttempts[previousAttempts.length - 1].error || ""}`,
+    )
   return await runAiWithErrorCorrection({
     attempt,
+    onStream,
+    onVfsChanged,
     maxAttempts,
     logsDir,
     systemPrompt,
     prompt,
     promptNumber,
     previousAttempts,
+    vfs,
   })
 }

@@ -9,10 +9,12 @@ export const askAiWithPreviousAttempts = async ({
   prompt,
   systemPrompt,
   previousAttempts,
+  onStream,
 }: {
   prompt: string
   systemPrompt: string
   previousAttempts?: AttemptHistory[]
+  onStream?: (chunk: string) => void
 }): Promise<string> => {
   const messages: { role: "assistant" | "user"; content: string }[] = [
     { role: "user", content: prompt },
@@ -44,13 +46,32 @@ export const askAiWithPreviousAttempts = async ({
   let result = ""
 
   try {
-    const completion = await anthropic.messages.create({
+    if (onStream)
+      onStream(
+        `Start streaming AI response, attempt: ${(previousAttempts?.length || 0) + 1}`,
+      )
+    const completionStream = await anthropic.messages.create({
       model: "claude-3-5-haiku-20241022",
       max_tokens: 2048,
       system: systemPrompt,
       messages: messages,
+      stream: true,
     })
-    result = (completion as any).content[0]?.text
+    for await (const chunk of completionStream) {
+      const delta = (chunk as any).delta
+      let textChunk = ""
+      if (
+        typeof chunk === "object" &&
+        delta &&
+        typeof delta.text === "string"
+      ) {
+        textChunk = delta.text
+      } else if (typeof chunk === "string") {
+        textChunk = chunk
+      }
+      if (onStream) onStream(textChunk)
+      result += textChunk
+    }
   } catch {
     result = "Error in AI API request"
   }
