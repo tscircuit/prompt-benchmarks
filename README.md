@@ -11,6 +11,58 @@ This repository contains benchmarks for evaluating and improving the quality of 
 - **Benchmarking & Scoring** (using evalite and custom scorers in `benchmarks/scorers`): Run multiple tests to ensure circuit validity and quality.
 
 
+## Installation
+
+You can install this package from npm using Bun:
+
+```bash
+bun add @tscircuit/prompt-benchmarks
+```
+
+## Using the AiCoder
+
+Below is the AiCoder interface:
+
+```tsx
+export interface AiCoder {
+  onStreamedChunk: (chunk: string) => void
+  onVfsChanged: () => void
+  vfs: { [filepath: string]: string }
+  availableOptions: { name: string; options: string[] }[]
+  submitPrompt: (
+    prompt: string,
+    options?: { selectedMicrocontroller?: string },
+  ) => Promise<void>
+}
+```
+
+The AI Coder supports streaming of AI responses and notifying you when the virtual file system (VFS) is updated. To achieve this, you can pass two callback functions when creating an AiCoder instance:
+- **onStreamedChunk**: A callback function that receives streamed chunks from the AI. This is useful for logging or updating a UI with gradual progress.
+- **onVfsChanged**: A callback function that is invoked whenever the VFS is updated with new content. This is useful for refreshing a file view or triggering further processing.
+
+**Example Usage:**
+
+```tsx
+import { createAiCoder } from "@tscircuit/prompt-benchmarks/lib/ai/aiCoder"
+
+// Define a callback for handling streamed chunks
+const handleStream = (chunk: string) => {
+  console.log("Streaming update:", chunk)
+}
+
+// Define a callback for when the VFS is updated
+const handleVfsUpdate = () => {
+  console.log("The virtual file system has been updated.")
+}
+
+// Create an instance of AiCoder with your callbacks
+const aiCoder = createAiCoder(handleStream, handleVfsUpdate)
+
+// Submit a prompt to generate a circuit.
+// The onStream callback logs streaming updates and onVfsChanged notifies when a new file is added to the VFS.
+aiCoder.submitPrompt("create a circuit that blinks an LED")
+```
+
 ## Running Benchmarks
 
 To run the benchmarks using evalite, use:
