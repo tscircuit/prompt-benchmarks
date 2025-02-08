@@ -10,12 +10,15 @@ export const askAiWithPreviousAttempts = async ({
   systemPrompt,
   previousAttempts,
   onStream,
+  anthropicClient,
 }: {
   prompt: string
   systemPrompt: string
   previousAttempts?: AttemptHistory[]
   onStream?: (chunk: string) => void
+  anthropicClient?: typeof anthropic
 }): Promise<string> => {
+  const client = anthropicClient || anthropic
   const messages: { role: "assistant" | "user"; content: string }[] = [
     { role: "user", content: prompt },
   ]
@@ -50,7 +53,7 @@ export const askAiWithPreviousAttempts = async ({
       onStream(
         `Start streaming AI response, attempt: ${(previousAttempts?.length || 0) + 1}`,
       )
-    const completionStream = await anthropic.messages.create({
+    const completionStream = await client.messages.create({
       model: "claude-3-5-haiku-20241022",
       max_tokens: 2048,
       system: systemPrompt,

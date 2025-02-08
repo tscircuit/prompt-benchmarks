@@ -17,13 +17,16 @@ export class AiCoderImpl implements AiCoder {
   onVfsChanged: () => void
   vfs: { [filepath: string]: string } = {}
   availableOptions = [{ name: "microController", options: ["pico", "esp32"] }]
+  anthropicClient: import("@anthropic-ai/sdk").Anthropic | undefined
 
   constructor(
     onStreamedChunk: (chunk: string) => void,
     onVfsChanged: () => void,
+    anthropicClient?: import("@anthropic-ai/sdk").Anthropic,
   ) {
     this.onStreamedChunk = onStreamedChunk
     this.onVfsChanged = onVfsChanged
+    this.anthropicClient = anthropicClient
   }
 
   async submitPrompt(
@@ -62,6 +65,7 @@ export class AiCoderImpl implements AiCoder {
 export const createAiCoder = (
   onStreamedChunk: (chunk: string) => void,
   onVfsChanged: () => void,
+  anthropicClient?: import("@anthropic-ai/sdk").Anthropic,
 ): AiCoder => {
-  return new AiCoderImpl(onStreamedChunk, onVfsChanged)
+  return new AiCoderImpl(onStreamedChunk, onVfsChanged, anthropicClient)
 }

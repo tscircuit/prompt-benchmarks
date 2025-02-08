@@ -1,7 +1,16 @@
 import Anthropic from "@anthropic-ai/sdk"
-import dotenv from "dotenv"
-dotenv.config()
+
+let apiKey = ""
+if (
+  typeof process !== "undefined" &&
+  process.env &&
+  process.env.ANTHROPIC_API_KEY
+) {
+  import("dotenv").then((dotenv) => dotenv.config())
+  apiKey = process.env.ANTHROPIC_API_KEY
+}
 
 export const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey,
+  dangerouslyAllowBrowser: true,
 })

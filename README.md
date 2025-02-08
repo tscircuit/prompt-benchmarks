@@ -36,6 +36,8 @@ export interface AiCoder {
 }
 ```
 
+*Note: The `createAiCoder` function now accepts an optional `anthropicClient` parameter to override the default Anthropic client. This allows you to provide a custom client (for example, with different API key configuration) when using AiCoder in environments like the browser.*
+
 The AI Coder supports streaming of AI responses and notifying you when the virtual file system (VFS) is updated. To achieve this, you can pass two callback functions when creating an AiCoder instance:
 - **onStreamedChunk**: A callback function that receives streamed chunks from the AI. This is useful for logging or updating a UI with gradual progress.
 - **onVfsChanged**: A callback function that is invoked whenever the VFS is updated with new content. This is useful for refreshing a file view or triggering further processing.
