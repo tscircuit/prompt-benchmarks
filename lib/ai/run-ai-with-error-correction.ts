@@ -1,6 +1,7 @@
 import { safeEvaluateCode } from "lib/code-runner"
 import { askAiWithPreviousAttempts } from "./ask-ai-with-previous-attempts"
 import { saveAttemptLog } from "lib/utils/save-attempt"
+import type Anthropic from "@anthropic-ai/sdk"
 const createAttemptFile = ({
   fileName,
   prompt,
@@ -57,7 +58,7 @@ export const runAiWithErrorCorrection = async ({
   onStream?: (chunk: string) => void
   onVfsChanged?: () => void
   vfs?: Record<string, string>
-  anthropicClient?: import("@anthropic-ai/sdk").Anthropic
+  anthropicClient?: Anthropic
 }): Promise<{
   code: string
   codeBlock: string
