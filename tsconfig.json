@@ -18,7 +18,8 @@
     "paths": {
       "src/*": ["src/*"],
       "tests/*": ["tests/*"],
-      "prompt-templates/*": ["lib/prompt-templates/*"]
+      "prompt-templates/*": ["lib/prompt-templates/*"],
+      "lib/*": ["lib/*"]
     },
 
     // Best practices

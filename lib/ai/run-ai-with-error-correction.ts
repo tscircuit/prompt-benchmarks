@@ -1,6 +1,7 @@
 import { safeEvaluateCode } from "lib/code-runner"
 import { askAiWithPreviousAttempts } from "./ask-ai-with-previous-attempts"
 import { saveAttemptLog } from "lib/utils/save-attempt"
+import type Anthropic from "@anthropic-ai/sdk"
 const createAttemptFile = ({
   fileName,
   prompt,
@@ -45,6 +46,7 @@ export const runAiWithErrorCorrection = async ({
   onStream,
   onVfsChanged,
   vfs,
+  anthropicClient,
 }: {
   attempt?: number
   logsDir?: string
@@ -56,6 +58,7 @@ export const runAiWithErrorCorrection = async ({
   onStream?: (chunk: string) => void
   onVfsChanged?: () => void
   vfs?: Record<string, string>
+  anthropicClient?: Anthropic
 }): Promise<{
   code: string
   codeBlock: string
@@ -66,6 +69,7 @@ export const runAiWithErrorCorrection = async ({
     systemPrompt,
     previousAttempts,
     onStream,
+    anthropicClient,
   })
   const codeMatch = aiResponse.match(/```tsx\s*([\s\S]*?)\s*```/)
   const code = codeMatch ? codeMatch[1].trim() : ""

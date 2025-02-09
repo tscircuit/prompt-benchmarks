@@ -4,14 +4,14 @@ import { expect, test } from "bun:test"
 test("AiCoder submitPrompt streams and updates vfs", async () => {
   const streamedChunks: string[] = []
   let vfsUpdated = false
-  const onStreamedChunk = (chunk: string) => {
+  const aiCoder = createAiCoder()
+  aiCoder.on("streamedChunk", (chunk: string) => {
+    console.log(chunk)
     streamedChunks.push(chunk)
-  }
-  const onVfsChanged = () => {
+  })
+  aiCoder.on("vfsChanged", () => {
     vfsUpdated = true
-  }
-
-  const aiCoder = createAiCoder(onStreamedChunk, onVfsChanged)
+  })
 
   await aiCoder.submitPrompt(
     "create a random complicated circuit that does something cool",

@@ -1,29 +1,38 @@
+import { EventEmitter } from "node:events"
+import type Anthropic from "@anthropic-ai/sdk"
 import { runAiWithErrorCorrection } from "./run-ai-with-error-correction"
 import { createLocalCircuitPrompt } from "lib/prompt-templates/create-local-circuit-prompt"
 
+export interface AiCoderEvents {
+  streamedChunk: string
+  vfsChanged: undefined
+}
+
 export interface AiCoder {
-  onStreamedChunk: (chunk: string) => void
-  onVfsChanged: () => void
   vfs: { [filepath: string]: string }
   availableOptions: { name: string; options: string[] }[]
   submitPrompt: (
     prompt: string,
     options?: { selectedMicrocontroller?: string },
   ) => Promise<void>
+  on<K extends keyof AiCoderEvents>(
+    event: K,
+    listener: (payload: AiCoderEvents[K]) => void,
+  ): this
 }
 
-export class AiCoderImpl implements AiCoder {
-  onStreamedChunk: (chunk: string) => void
-  onVfsChanged: () => void
+export class AiCoderImpl extends EventEmitter implements AiCoder {
   vfs: { [filepath: string]: string } = {}
   availableOptions = [{ name: "microController", options: ["pico", "esp32"] }]
+  anthropicClient: Anthropic | undefined
 
-  constructor(
-    onStreamedChunk: (chunk: string) => void,
-    onVfsChanged: () => void,
-  ) {
-    this.onStreamedChunk = onStreamedChunk
-    this.onVfsChanged = onVfsChanged
+  constructor({
+    anthropicClient,
+  }: {
+    anthropicClient?: Anthropic
+  }) {
+    super()
+    this.anthropicClient = anthropicClient
   }
 
   async submitPrompt(
@@ -40,28 +49,27 @@ export class AiCoderImpl implements AiCoder {
       promptNumber,
       maxAttempts: 4,
       previousAttempts: [],
-      onVfsChanged: this.onVfsChanged,
       onStream: (chunk: string) => {
         if (!streamStarted) {
-          this.onStreamedChunk("Creating a tscircuit local circuit...")
+          this.emit("streamedChunk", "Creating a tscircuit local circuit...")
           streamStarted = true
         }
         currentAttempt += chunk
-        this.onStreamedChunk(chunk)
+        this.emit("streamedChunk", chunk)
+      },
+      onVfsChanged: () => {
+        this.emit("vfsChanged")
       },
       vfs: this.vfs,
     })
     if (result.code) {
       const filepath = `prompt-${promptNumber}-attempt-final.tsx`
       this.vfs[filepath] = result.code
-      this.onVfsChanged()
+      this.emit("vfsChanged")
     }
   }
 }
 
-export const createAiCoder = (
-  onStreamedChunk: (chunk: string) => void,
-  onVfsChanged: () => void,
-): AiCoder => {
-  return new AiCoderImpl(onStreamedChunk, onVfsChanged)
+export const createAiCoder = (anthropicClient?: Anthropic): AiCoder => {
+  return new AiCoderImpl({ anthropicClient })
 }
