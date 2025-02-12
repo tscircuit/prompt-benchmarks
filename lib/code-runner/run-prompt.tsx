@@ -32,52 +32,30 @@ export const runInitialPrompt = async (
   const responseText: string = (completion as any).content[0]?.text
 
   const codefence = extractCodefence(responseText)
-  debug({ codefence })
+  const result = await safeEvaluateCode(`${codefence}`, context)
 
-  if (!codefence) {
-    throw new Error("No codefence found in response")
-  }
-
-  // Run the codefence, detect syntax errors, and evaluate circuit
-  const {
-    success,
-    error,
-    errorStage,
-    circuit,
-    circuitJson,
-    hasSyntaxError,
-    syntaxError,
-    circuitErrors,
-    typescriptErrors,
-  } = safeEvaluateCode(codefence, {
-    outputType: context.outputType,
-    preSuppliedImports: context.preSuppliedImports,
-  })
-
-  if (success) {
+  if (result.success) {
     return {
-      success: true as const,
+      success: true,
       codefence,
-      error,
+      circuitJson: result.circuitJson,
+      error: undefined,
       hasSyntaxError: false,
       syntaxError: undefined,
       circuitErrors: [],
       typescriptErrors: [],
-      circuit,
-      circuitJson,
     }
-  }
-
-  return {
-    success: false as const,
-    codefence,
-    error,
-    errorStage,
-    hasSyntaxError,
-    syntaxError,
-    circuitErrors,
-    typescriptErrors,
-    circuit,
-    circuitJson,
+  } else {
+    return {
+      success: false,
+      codefence,
+      error: result.error,
+      errorStage: result.errorStage,
+      hasSyntaxError: result.hasSyntaxError,
+      syntaxError: result.error,
+      circuitErrors: [],
+      typescriptErrors: [],
+      circuitJson: undefined,
+    }
   }
 }
