@@ -88,14 +88,14 @@ export const safeEvaluateCode = (
     }
   }
 
-  // if (Object.keys(module.exports).length > 1) {
-  //   return {
-  //     success: false,
-  //     error: `Too many exports, only export one thing. You exported: ${JSON.stringify(Object.keys(module.exports))}`,
-  //     errorStage: "generation-result",
-  //     hasSyntaxError: false,
-  //   }
-  // }
+  if (Object.keys(module.exports).length > 1) {
+    return {
+      success: false,
+      error: `Too many exports, only export one thing. You exported: ${JSON.stringify(Object.keys(module.exports))}`,
+      errorStage: "generation-result",
+      hasSyntaxError: false,
+    }
+  }
 
   const primaryKey = Object.keys(module.exports)[0]
   const UserElm = (props: any) =>
