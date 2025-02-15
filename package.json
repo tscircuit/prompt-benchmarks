@@ -22,7 +22,6 @@
   },
   "type": "module",
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.36.3",
     "@biomejs/biome": "^1.9.3",
     "@tscircuit/core": "^0.0.269",
     "@types/babel__standalone": "^7.1.7",
@@ -48,6 +47,7 @@
     "dotenv": "^16.4.7",
     "evalite": "^0.8.4",
     "extract-codefence": "^0.0.4",
+    "openai": "^4.83.0",
     "toml": "^3.0.0"
   }
 }

@@ -1,4 +1,4 @@
-import { anthropic } from "lib/ai/anthropic"
+import { openai } from "lib/ai/openai"
 
 interface AttemptHistory {
   code: string
@@ -10,18 +10,20 @@ export const askAiWithPreviousAttempts = async ({
   systemPrompt,
   previousAttempts,
   onStream,
-  anthropicClient,
+  openaiClient,
 }: {
   prompt: string
   systemPrompt: string
   previousAttempts?: AttemptHistory[]
   onStream?: (chunk: string) => void
-  anthropicClient?: typeof anthropic
+  openaiClient?: typeof openai
 }): Promise<string> => {
-  const client = anthropicClient || anthropic
-  const messages: { role: "assistant" | "user"; content: string }[] = [
-    { role: "user", content: prompt },
-  ]
+  const client = openaiClient || openai
+  const messages: { role: "assistant" | "user" | "system"; content: string }[] =
+    [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: prompt },
+    ]
 
   if (previousAttempts?.length) {
     messages.push({
@@ -53,29 +55,21 @@ export const askAiWithPreviousAttempts = async ({
       onStream(
         `Start streaming AI response, attempt: ${(previousAttempts?.length || 0) + 1}`,
       )
-    const completionStream = await client.messages.create({
-      model: "claude-3-5-haiku-20241022",
+    const completionStream = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+
       max_tokens: 2048,
-      system: systemPrompt,
+
       messages: messages,
       stream: true,
     })
     for await (const chunk of completionStream) {
-      const delta = (chunk as any).delta
-      let textChunk = ""
-      if (
-        typeof chunk === "object" &&
-        delta &&
-        typeof delta.text === "string"
-      ) {
-        textChunk = delta.text
-      } else if (typeof chunk === "string") {
-        textChunk = chunk
-      }
-      if (onStream) onStream(textChunk)
+      const textChunk = chunk.choices[0].delta.content
+
+      if (onStream) onStream(textChunk || "")
       result += textChunk
     }
-  } catch {
+  } catch (e) {
     result = "Error in AI API request"
   }
 

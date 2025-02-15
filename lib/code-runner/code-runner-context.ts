@@ -1,6 +1,6 @@
-import type { Anthropic } from "@anthropic-ai/sdk"
+import { OpenAI } from "openai"
 
-export type Model = Anthropic.Completion["model"]
+export type Model = OpenAI.Completion["model"]
 export type OutputType = "board" | "footprint" | "package" | "model"
 
 export interface PromptContext {

@@ -1,5 +1,5 @@
 import { createScorer } from "evalite"
-import { anthropic } from "lib/ai/anthropic"
+import { openai } from "lib/ai/openai"
 
 const getAiScore = async (prompt: string, code: string): Promise<number> => {
   const scoringPrompt = `You are an electronics expert. Please evaluate this circuit code and give it a score from 0 to 100 based on:       
@@ -16,8 +16,9 @@ const getAiScore = async (prompt: string, code: string): Promise<number> => {
  ${code}`
 
   try {
-    const completion = await anthropic.messages.create({
-      model: "claude-3-5-haiku-20241022",
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+
       max_tokens: 1024,
       messages: [
         {
@@ -26,8 +27,8 @@ const getAiScore = async (prompt: string, code: string): Promise<number> => {
         },
       ],
     })
+    const scoreText = completion.choices[0].message.content || ""
 
-    const scoreText = (completion as any).content[0]?.text || "0"
     const result = Math.min(1, Math.max(0, parseFloat(scoreText) || 0))
 
     return result

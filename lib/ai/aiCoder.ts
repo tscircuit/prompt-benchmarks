@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events"
-import type Anthropic from "@anthropic-ai/sdk"
+import type { OpenAI } from "openai"
 import { runAiWithErrorCorrection } from "./run-ai-with-error-correction"
 import { createLocalCircuitPrompt } from "lib/prompt-templates/create-local-circuit-prompt"
 
@@ -24,15 +24,15 @@ export interface AiCoder {
 export class AiCoderImpl extends EventEmitter implements AiCoder {
   vfs: { [filepath: string]: string } = {}
   availableOptions = [{ name: "microController", options: ["pico", "esp32"] }]
-  anthropicClient: Anthropic | undefined
+  openaiClient: OpenAI | undefined
 
   constructor({
-    anthropicClient,
+    openaiClient,
   }: {
-    anthropicClient?: Anthropic
+    openaiClient?: OpenAI
   }) {
     super()
-    this.anthropicClient = anthropicClient
+    this.openaiClient = openaiClient
   }
 
   async submitPrompt(
@@ -70,6 +70,6 @@ export class AiCoderImpl extends EventEmitter implements AiCoder {
   }
 }
 
-export const createAiCoder = (anthropicClient?: Anthropic): AiCoder => {
-  return new AiCoderImpl({ anthropicClient })
+export const createAiCoder = (openaiClient?: OpenAI): AiCoder => {
+  return new AiCoderImpl({ openaiClient })
 }
