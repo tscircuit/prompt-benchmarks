@@ -1,4 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk"
 import * as React from "react"
 import { RootCircuit } from "@tscircuit/core"
 import { safeTranspileCode } from "./transpile-code"

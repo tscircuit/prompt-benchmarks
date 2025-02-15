@@ -1,20 +1,20 @@
-import { anthropic } from "lib/ai/anthropic"
+import { openai } from "lib/ai/openai"
 
 export const askAi = async (
   prompt: string,
   systemPrompt: string,
 ): Promise<string> => {
-  const completion = await anthropic.messages.create({
-    model: "claude-3-5-haiku-20241022",
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+
     max_tokens: 2048,
-    system: systemPrompt,
     messages: [
+      { role: "system", content: systemPrompt },
       {
         role: "user",
         content: prompt,
       },
     ],
   })
-
-  return (completion as any).content[0]?.text || ""
+  return completion.choices[0].message.content || ""
 }

@@ -34,4 +34,21 @@ tssop20_p0.5mm
 sot23
 
 ${filesDescriptionMd}
+
+#### Available Imports
+
+${
+  !availableImports
+    ? "There are no available imports."
+    : Object.entries(availableImports)
+        .map(([name, description]) =>
+          `
+##### \`${name}\`
+
+${description}
+
+`.trim(),
+        )
+        .join("\n")
+}
 `.trim()

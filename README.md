@@ -5,7 +5,7 @@
 This repository contains benchmarks for evaluating and improving the quality of system prompts used to generate tscircuit code. It includes components for:
 
 - **Code Runner** (in `lib/code-runner`): Safely transpiles, evaluates, and renders TSX code for circuit generation.
-- **AI Integration** (in `lib/ai`): Interfaces with Anthropic’s Claude models for prompt completions and error correction.
+- **AI Integration** (in `lib/ai`): Interfaces with Openai’s models for prompt completions and error correction.
 - **Utility Modules** (in `lib/utils`): Provide logging, snapshot management, and type-checking of generated circuits.
 - **Prompt Templates** (in `lib/prompt-templates`): Define various prompt structures for generating different circuit types.
 - **Benchmarking & Scoring** (using evalite and custom scorers in `benchmarks/scorers`): Run multiple tests to ensure circuit validity and quality.
@@ -36,8 +36,7 @@ export interface AiCoder {
 }
 ```
 
-*Note: The `createAiCoder` function now accepts an optional `anthropicClient` parameter to override the default Anthropic client. This allows you to provide a custom client (for example, with different API key configuration) when using AiCoder in environments like the browser.*
-
+*Note: The `createAiCoder` function now accepts an optional `openaiClient` parameter to override the default openai client. This allows you to provide a custom client.
 The AI Coder supports streaming of AI responses and notifying you when the virtual file system (VFS) is updated. To achieve this, you can pass two callback functions when creating an AiCoder instance:
 - **onStreamedChunk**: A callback function that receives streamed chunks from the AI. This is useful for logging or updating a UI with gradual progress.
 - **onVfsChanged**: A callback function that is invoked whenever the VFS is updated with new content. This is useful for refreshing a file view or triggering further processing.

@@ -6,7 +6,6 @@ test("AiCoder submitPrompt streams and updates vfs", async () => {
   let vfsUpdated = false
   const aiCoder = createAiCoder()
   aiCoder.on("streamedChunk", (chunk: string) => {
-    console.log(chunk)
     streamedChunks.push(chunk)
   })
   aiCoder.on("vfsChanged", () => {

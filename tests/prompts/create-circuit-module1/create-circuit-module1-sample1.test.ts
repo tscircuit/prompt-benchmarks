@@ -9,7 +9,7 @@ test("create-circuit-module1-prompt1", async () => {
   const { success, circuit } = await runInitialPrompt(
     { systemPrompt, userPrompt: moduleSample1 },
     {
-      model: "claude-3-haiku-20240307",
+      model: "gpt-4o-mini",
       outputType: "board",
     },
   )

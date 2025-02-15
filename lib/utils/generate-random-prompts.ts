@@ -1,10 +1,11 @@
-import { anthropic } from "lib/ai/anthropic"
+import { openai } from "lib/ai/openai"
 
 export const generateRandomPrompts = async (
   numberOfPrompts: number,
 ): Promise<string[]> => {
-  const completion = await anthropic.messages.create({
-    model: "claude-3-5-haiku-20241022",
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+
     max_tokens: 2048,
     messages: [
       {
@@ -14,7 +15,8 @@ export const generateRandomPrompts = async (
     ],
   })
 
-  const response = (completion as any).content[0]?.text || ""
+  const response = completion.choices[0].message.content || ""
+
   return response
     .split("\n")
     .filter((line: string) => /^\d+\./.test(line))

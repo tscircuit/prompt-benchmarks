@@ -10,7 +10,7 @@ test("create-circuit-board1-prompt1", async () => {
   const { success, circuit, codefence } = await runInitialPrompt(
     { systemPrompt, userPrompt: boardSample1 },
     {
-      model: "claude-3-haiku-20240307",
+      model: "gpt-4o-mini",
       outputType: "board",
     },
   )

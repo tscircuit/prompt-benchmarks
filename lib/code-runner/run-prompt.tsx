@@ -1,9 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk"
-import * as React from "react"
-import { Circuit } from "@tscircuit/core"
 import { safeEvaluateCode } from "lib/code-runner/safe-evaluate-code"
 import { extractCodefence } from "extract-codefence"
-import { anthropic } from "lib/ai/anthropic"
+import { openai } from "lib/ai/openai"
 import Debug from "debug"
 import type {
   PromptAndRunnerContext,
@@ -17,10 +14,13 @@ export const runInitialPrompt = async (
   context: PromptAndRunnerContext,
 ) => {
   const type = context.outputType
-  const completion = await anthropic.messages.create({
+  const completion = await openai.chat.completions.create({
     model: context.model,
-    system: systemPrompt,
     messages: [
+      {
+        role: "system",
+        content: systemPrompt,
+      },
       {
         role: "user",
         content: userPrompt,
@@ -29,7 +29,7 @@ export const runInitialPrompt = async (
     max_tokens: 4096,
   })
 
-  const responseText: string = (completion as any).content[0]?.text
+  const responseText: string = completion.choices[0].message.content || ""
 
   const codefence = extractCodefence(responseText)
   debug({ codefence })
