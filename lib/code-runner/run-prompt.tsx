@@ -38,8 +38,6 @@ export const runInitialPrompt = async (
     throw new Error("No codefence found in response")
   }
 
-  console.log("fence", codefence)
-
   // Run the codefence, detect syntax errors, and evaluate circuit
   const {
     success,
