@@ -21,6 +21,6 @@ jobs:
         run: bun install
 
       - name: Run tests
+        run: bun test --timeout 50000
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: bun test --timeout 50000
