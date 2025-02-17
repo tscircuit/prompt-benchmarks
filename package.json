@@ -41,13 +41,16 @@
   },
   "dependencies": {
     "@babel/standalone": "^7.25.7",
+    "@tscircuit/eval": "^0.0.93",
     "@tscircuit/featured-snippets": "^0.0.1",
     "@tscircuit/footprinter": "^0.0.102",
+    "comlink": "^4.4.2",
     "debug": "^4.3.7",
     "dotenv": "^16.4.7",
     "evalite": "^0.8.4",
     "extract-codefence": "^0.0.4",
     "openai": "^4.83.0",
+    "jscad-fiber": "^0.0.77",
     "toml": "^3.0.0"
   }
 }
