@@ -1,7 +1,8 @@
-import { safeEvaluateCode } from "lib/code-runner"
 import { askAiWithPreviousAttempts } from "./ask-ai-with-previous-attempts"
 import { saveAttemptLog } from "lib/utils/save-attempt"
 import type OpenAI from "openai"
+import { evaluateTscircuitCode } from "./evaluate-tscircuit-code"
+
 const createAttemptFile = ({
   fileName,
   prompt,
@@ -75,17 +76,15 @@ export const runAiWithErrorCorrection = async ({
   const code = codeMatch ? codeMatch[1].trim() : ""
   const codeBlockMatch = aiResponse.match(/```tsx[\s\S]*?```/)
   const codeBlock = codeBlockMatch ? codeBlockMatch[0] : ""
-  const evaluation = safeEvaluateCode(code, {
-    outputType: "board",
-    preSuppliedImports: {},
-  })
 
-  if (evaluation.success) {
+  const { success, error: evaluationError } = await evaluateTscircuitCode(code)
+
+  if (success) {
     if (onStream) onStream("Local tscircuit circuit created")
     return { code, codeBlock, error: "" }
   }
 
-  const error = evaluation.error || ""
+  const error = evaluationError || ""
   previousAttempts.push({ code, error })
   const attemptFileName = `prompt-${promptNumber}-attempt-${attempt}.md`
   if (logsDir)
