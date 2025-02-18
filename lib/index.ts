@@ -1,6 +1,3 @@
-export { createCircuitBoard1Template } from "lib/prompt-templates/create-circuit-board1"
-export { createCircuitBoard2Template } from "lib/prompt-templates/create-circuit-board2"
-export * from "./code-runner/index"
-export * from "./code-runner-utils/index"
 export * from "./ai/index"
 export * from "./prompt-templates/index"
+export * from "./utils/get-imports-from-code"

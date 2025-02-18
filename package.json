@@ -8,16 +8,14 @@
   "license": "MIT",
   "author": "Severin Ibarluzea",
   "scripts": {
-    "build": "tsup-node lib/index.ts lib/code-runner/index.ts lib/code-runner-utils/index.ts --format esm --dts",
+    "build": "tsup-node lib/index.ts --format esm --dts",
     "start": "bun run eval:watch",
-    "test": "bun test --timeout=120000",
+    "test": "bun test --timeout 50000",
     "eval": "evalite",
     "eval:watch": "evalite watch",
     "format": "biome format . --write"
   },
   "exports": {
-    "./code-runner": "./dist/code-runner/index.js",
-    "./code-runner-utils": "./dist/code-runner-utils/index.js",
     ".": "./dist/index.js"
   },
   "type": "module",
