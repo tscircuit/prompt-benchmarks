@@ -2,7 +2,7 @@ import path from "node:path"
 import { createLocalCircuitPrompt } from "../lib/prompt-templates/create-local-circuit-prompt"
 import { evalite } from "evalite"
 import { CircuitScorer } from "./scorers/circuit-scorer"
-import { askAboutOutput } from "tests/fixtures/ask-about-output"
+import { askAboutOutput } from "lib/ai/ask-about-output"
 import { cleanupAttemptLogs } from "lib/utils/cleanup-attempt-logs"
 import { savePrompt } from "lib/utils/save-prompt"
 import { loadProblems } from "lib/utils/load-problems"
@@ -16,7 +16,7 @@ evalite("Reasoning Electronics Engineer", {
   data: async () => {
     cleanupAttemptLogs(logsDir)
     const problems = loadProblems(
-      path.join(__dirname, "..", "problem-sets", "problems-2.toml"),
+      path.join(__dirname, "problem-sets", "problems-2.toml"),
     )
     systemPrompt = await createLocalCircuitPrompt()
 

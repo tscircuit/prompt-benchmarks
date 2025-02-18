@@ -1,19 +1,19 @@
 import path from "node:path"
-import { safeEvaluateCode } from "../lib/code-runner/safe-evaluate-code"
 import { createLocalCircuitPrompt } from "../lib/prompt-templates/create-local-circuit-prompt"
 import { evalite } from "evalite"
 import { CircuitScorer } from "./scorers/circuit-scorer"
-import { askAboutOutput } from "tests/fixtures/ask-about-output"
+import { askAboutOutput } from "lib/ai/ask-about-output"
 import { savePrompt } from "lib/utils/save-prompt"
 import { loadProblems } from "lib/utils/load-problems"
 import { askAi } from "lib/ai/ask-ai"
+import { evaluateTscircuitCode } from "lib/ai/evaluate-tscircuit-code"
 
 let systemPrompt = ""
 
-evalite.experimental_skip("Electronics Engineer", {
+evalite("Electronics Engineer", {
   data: async () => {
     const problems = loadProblems(
-      path.join(__dirname, "..", "problem-sets", "problems-1.toml"),
+      path.join(__dirname, "problem-sets", "problems-1.toml"),
     )
     systemPrompt = await createLocalCircuitPrompt()
 
@@ -37,17 +37,15 @@ evalite.experimental_skip("Electronics Engineer", {
     const code = codeMatch ? codeMatch[1].trim() : ""
     const codeBlockMatch = aiResponse.match(/```tsx[\s\S]*?```/)
     const codeBlock = codeBlockMatch ? codeBlockMatch[0] : ""
-    const evaluation = safeEvaluateCode(code, {
-      outputType: "board",
-      preSuppliedImports: {},
-    })
+    const { success, error: evaluationError } =
+      await evaluateTscircuitCode(code)
 
     const output: {
       results: { result: boolean; expected: boolean }[]
       code: string
     } = { results: [], code: "" }
 
-    if (evaluation.success) {
+    if (success) {
       output.code = codeBlock
       for (const question of input.questions) {
         output.results.push({
@@ -57,7 +55,7 @@ evalite.experimental_skip("Electronics Engineer", {
       }
       return output
     }
-    return `${evaluation.error}. Code:\n${codeBlock}`
+    return `${evaluationError}. Code:\n${codeBlock}`
   },
   experimental_customColumns: async (result) => {
     if (typeof result.output === "string")

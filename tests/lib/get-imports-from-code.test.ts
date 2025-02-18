@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { getImportsFromCode } from "../../lib/code-runner-utils/get-imports-from-code"
+import { getImportsFromCode } from "../../lib/utils/get-imports-from-code"
 
 test("getImportsFromCode with various import styles", () => {
   const testCode = `
