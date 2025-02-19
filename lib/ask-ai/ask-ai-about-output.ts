@@ -1,6 +1,6 @@
 import { openai } from "lib/ai/openai"
 
-export const askAboutOutput = async (
+export const askAiAboutOutput = async (
   codefence: string,
   question: string,
 ): Promise<boolean> => {

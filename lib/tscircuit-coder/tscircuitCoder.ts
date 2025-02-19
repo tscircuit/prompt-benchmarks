@@ -3,25 +3,25 @@ import type { OpenAI } from "openai"
 import { runAiWithErrorCorrection } from "./run-ai-with-error-correction"
 import { createLocalCircuitPrompt } from "lib/prompt-templates/create-local-circuit-prompt"
 
-export interface AiCoderEvents {
+export interface TscircuitCoderEvents {
   streamedChunk: string
   vfsChanged: undefined
 }
 
-export interface AiCoder {
+export interface TscircuitCoder {
   vfs: { [filepath: string]: string }
   availableOptions: { name: string; options: string[] }[]
   submitPrompt: (
     prompt: string,
     options?: { selectedMicrocontroller?: string },
   ) => Promise<void>
-  on<K extends keyof AiCoderEvents>(
+  on<K extends keyof TscircuitCoderEvents>(
     event: K,
-    listener: (payload: AiCoderEvents[K]) => void,
+    listener: (payload: TscircuitCoderEvents[K]) => void,
   ): this
 }
 
-export class AiCoderImpl extends EventEmitter implements AiCoder {
+export class TscircuitCoderImpl extends EventEmitter implements TscircuitCoder {
   vfs: { [filepath: string]: string } = {}
   availableOptions = [{ name: "microController", options: ["pico", "esp32"] }]
   openaiClient: OpenAI | undefined
@@ -70,6 +70,6 @@ export class AiCoderImpl extends EventEmitter implements AiCoder {
   }
 }
 
-export const createAiCoder = (openaiClient?: OpenAI): AiCoder => {
-  return new AiCoderImpl({ openaiClient })
+export const createTscircuitCoder = (openaiClient?: OpenAI): TscircuitCoder => {
+  return new TscircuitCoderImpl({ openaiClient })
 }

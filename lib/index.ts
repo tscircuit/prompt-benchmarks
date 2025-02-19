@@ -1,3 +1,5 @@
 export * from "./ai/index"
 export * from "./prompt-templates/index"
+export * from "./ask-ai/index"
+export * from "./tscircuit-coder/index"
 export * from "./utils/get-imports-from-code"

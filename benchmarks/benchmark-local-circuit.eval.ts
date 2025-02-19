@@ -2,11 +2,11 @@ import path from "node:path"
 import { createLocalCircuitPrompt } from "../lib/prompt-templates/create-local-circuit-prompt"
 import { evalite } from "evalite"
 import { CircuitScorer } from "./scorers/circuit-scorer"
-import { askAboutOutput } from "lib/ai/ask-about-output"
+import { askAiAboutOutput } from "lib/ask-ai/ask-ai-about-output"
 import { savePrompt } from "lib/utils/save-prompt"
 import { loadProblems } from "lib/utils/load-problems"
-import { askAi } from "lib/ai/ask-ai"
-import { evaluateTscircuitCode } from "lib/ai/evaluate-tscircuit-code"
+import { askAi } from "lib/ask-ai/ask-ai"
+import { evaluateTscircuitCode } from "lib/utils/evaluate-tscircuit-code"
 
 let systemPrompt = ""
 
@@ -49,7 +49,7 @@ evalite("Electronics Engineer", {
       output.code = codeBlock
       for (const question of input.questions) {
         output.results.push({
-          result: await askAboutOutput(code, question.text),
+          result: await askAiAboutOutput(code, question.text),
           expected: question.answer,
         })
       }

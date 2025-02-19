@@ -1,7 +1,7 @@
-import { askAiWithPreviousAttempts } from "./ask-ai-with-previous-attempts"
+import { askAiWithPreviousAttempts } from "../ask-ai/ask-ai-with-previous-attempts"
 import { saveAttemptLog } from "lib/utils/save-attempt"
 import type OpenAI from "openai"
-import { evaluateTscircuitCode } from "./evaluate-tscircuit-code"
+import { evaluateTscircuitCode } from "../utils/evaluate-tscircuit-code"
 
 const createAttemptFile = ({
   fileName,
