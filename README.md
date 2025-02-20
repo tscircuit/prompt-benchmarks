@@ -19,12 +19,12 @@ You can install this package from npm using Bun:
 bun add @tscircuit/prompt-benchmarks
 ```
 
-## Using the AiCoder
+## Using the TscircuitCoder
 
-Below is the AiCoder interface:
+Below is the TscircuitCoder interface:
 
 ```tsx
-export interface AiCoder {
+export interface TscircuitCoder {
   onStreamedChunk: (chunk: string) => void
   onVfsChanged: () => void
   vfs: { [filepath: string]: string }
@@ -36,15 +36,15 @@ export interface AiCoder {
 }
 ```
 
-*Note: The `createAiCoder` function now accepts an optional `openaiClient` parameter to override the default openai client. This allows you to provide a custom client.
-The AI Coder supports streaming of AI responses and notifying you when the virtual file system (VFS) is updated. To achieve this, you can pass two callback functions when creating an AiCoder instance:
+*Note: The `createTscirciutCoder` function now accepts an optional `openaiClient` parameter to override the default openai client. This allows you to provide a custom client.
+The AI Coder supports streaming of AI responses and notifying you when the virtual file system (VFS) is updated. To achieve this, you can pass two callback functions when creating an TscircuitCoder instance:
 - **onStreamedChunk**: A callback function that receives streamed chunks from the AI. This is useful for logging or updating a UI with gradual progress.
 - **onVfsChanged**: A callback function that is invoked whenever the VFS is updated with new content. This is useful for refreshing a file view or triggering further processing.
 
 **Example Usage:**
 
 ```tsx
-import { createAiCoder } from "@tscircuit/prompt-benchmarks/lib/ai/aiCoder"
+import { createTscircuitCoder } from "@tscircuit/prompt-benchmarks/lib/ai/tscircuitCoder"
 
 // Define a callback for handling streamed chunks
 const handleStream = (chunk: string) => {
@@ -56,12 +56,12 @@ const handleVfsUpdate = () => {
   console.log("The virtual file system has been updated.")
 }
 
-// Create an instance of AiCoder with your callbacks
-const aiCoder = createAiCoder(handleStream, handleVfsUpdate)
+// Create an instance of TscircuitCoder with your callbacks
+const tscircuitCoder = createTscircuitCoder(handleStream, handleVfsUpdate)
 
 // Submit a prompt to generate a circuit.
 // The onStream callback logs streaming updates and onVfsChanged notifies when a new file is added to the VFS.
-aiCoder.submitPrompt("create a circuit that blinks an LED")
+tscircuitCoder.submitPrompt("create a circuit that blinks an LED")
 ```
 
 ## Running Benchmarks

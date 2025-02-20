@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test"
-import { evaluateTscircuitCode } from "../../lib/ai/evaluate-tscircuit-code"
+import { evaluateTscircuitCode } from "../../lib/utils/evaluate-tscircuit-code"
 
 const validCircuit = `
 export const StrainGaugeAmplifier = () => (

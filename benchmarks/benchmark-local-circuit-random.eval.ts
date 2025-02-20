@@ -4,7 +4,7 @@ import { evalite } from "evalite"
 import { AiCircuitScorer } from "./scorers/ai-circuit-scorer"
 import { cleanupAttemptLogs } from "lib/utils/cleanup-attempt-logs"
 import { savePrompt } from "lib/utils/save-prompt"
-import { runAiWithErrorCorrection } from "lib/ai/run-ai-with-error-correction"
+import { runAiWithErrorCorrection } from "lib/tscircuit-coder/run-ai-with-error-correction"
 import { generateRandomPrompts } from "lib/utils/generate-random-prompts"
 
 const logsDir = path.join(__dirname, "./attempt-logs")
