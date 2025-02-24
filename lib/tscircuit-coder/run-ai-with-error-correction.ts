@@ -39,6 +39,7 @@ interface AttemptHistory {
 export const runAiWithErrorCorrection = async ({
   attempt = 1,
   maxAttempts,
+  previousCode,
   logsDir,
   systemPrompt,
   prompt,
@@ -49,6 +50,7 @@ export const runAiWithErrorCorrection = async ({
   vfs,
   openaiClient,
 }: {
+  previousCode?: string
   attempt?: number
   logsDir?: string
   maxAttempts: number
@@ -68,6 +70,7 @@ export const runAiWithErrorCorrection = async ({
   const aiResponse = await askAiWithPreviousAttempts({
     prompt,
     systemPrompt,
+    previousCode,
     previousAttempts,
     onStream,
     openaiClient,

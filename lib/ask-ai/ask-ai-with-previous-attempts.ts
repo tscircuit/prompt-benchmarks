@@ -8,12 +8,14 @@ interface AttemptHistory {
 export const askAiWithPreviousAttempts = async ({
   prompt,
   systemPrompt,
+  previousCode,
   previousAttempts,
   onStream,
   openaiClient,
 }: {
   prompt: string
   systemPrompt: string
+  previousCode?: string
   previousAttempts?: AttemptHistory[]
   onStream?: (chunk: string) => void
   openaiClient?: typeof openai
@@ -24,6 +26,17 @@ export const askAiWithPreviousAttempts = async ({
       { role: "system", content: systemPrompt },
       { role: "user", content: prompt },
     ]
+
+  if (previousCode) {
+    messages.push({
+      role: "assistant",
+      content: "Please modify the code provided by the user.",
+    })
+    messages.push({
+      role: "user",
+      content: previousCode,
+    })
+  }
 
   if (previousAttempts?.length) {
     messages.push({
