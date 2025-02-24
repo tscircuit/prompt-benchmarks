@@ -11,10 +11,15 @@ export interface TscircuitCoderEvents {
 export interface TscircuitCoder {
   vfs: { [filepath: string]: string }
   availableOptions: { name: string; options: string[] }[]
-  submitPrompt: (
-    prompt: string,
-    options?: { selectedMicrocontroller?: string },
-  ) => Promise<void>
+  submitPrompt: ({
+    prompt,
+    options,
+    previousCode,
+  }: {
+    prompt: string
+    options?: { selectedMicrocontroller?: string }
+    previousCode?: string
+  }) => Promise<void>
   on<K extends keyof TscircuitCoderEvents>(
     event: K,
     listener: (payload: TscircuitCoderEvents[K]) => void,
@@ -35,31 +40,41 @@ export class TscircuitCoderImpl extends EventEmitter implements TscircuitCoder {
     this.openaiClient = openaiClient
   }
 
-  async submitPrompt(
-    prompt: string,
-    options?: { selectedMicrocontroller?: string },
-  ): Promise<void> {
+  async submitPrompt({
+    prompt,
+    previousCode,
+    options,
+  }: {
+    prompt: string
+    previousCode?: string
+    options?: { selectedMicrocontroller?: string }
+  }): Promise<void> {
+    this.vfs = {}
     const systemPrompt = await createLocalCircuitPrompt()
     const promptNumber = Date.now()
     let currentAttempt = ""
     let streamStarted = false
+    const onStream = (chunk: string) => {
+      if (!streamStarted) {
+        this.emit("streamedChunk", "Creating a tscircuit local circuit...")
+        streamStarted = true
+      }
+      currentAttempt += chunk
+      this.emit("streamedChunk", chunk)
+    }
+    const onVfsChanged = () => {
+      this.emit("vfsChanged")
+    }
+
     const result = await runAiWithErrorCorrection({
       prompt,
       systemPrompt,
       promptNumber,
+      previousCode,
       maxAttempts: 4,
       previousAttempts: [],
-      onStream: (chunk: string) => {
-        if (!streamStarted) {
-          this.emit("streamedChunk", "Creating a tscircuit local circuit...")
-          streamStarted = true
-        }
-        currentAttempt += chunk
-        this.emit("streamedChunk", chunk)
-      },
-      onVfsChanged: () => {
-        this.emit("vfsChanged")
-      },
+      onStream,
+      onVfsChanged,
       vfs: this.vfs,
     })
     if (result.code) {

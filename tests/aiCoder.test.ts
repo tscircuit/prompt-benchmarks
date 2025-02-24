@@ -12,9 +12,32 @@ test("TscircuitCoder submitPrompt streams and updates vfs", async () => {
     vfsUpdated = true
   })
 
-  await tscircuitCoder.submitPrompt(
-    "create a random complicated circuit that does something cool",
-  )
+  await tscircuitCoder.submitPrompt({
+    prompt: "create bridge rectifier circuit",
+  })
+
+  const rectifierCircuitCode = Object.values(tscircuitCoder.vfs)[
+    Object.keys(tscircuitCoder.vfs).length - 1
+  ]
+
+  await tscircuitCoder.submitPrompt({
+    previousCode: rectifierCircuitCode,
+    prompt: "add a sot23 transistor",
+  })
+
+  const codeWithTransistor = Object.values(tscircuitCoder.vfs)[
+    Object.keys(tscircuitCoder.vfs).length - 1
+  ]
+  expect(codeWithTransistor).toInclude("sot23")
+
+  await tscircuitCoder.submitPrompt({
+    previousCode: codeWithTransistor,
+    prompt: "add a tssop20 chip",
+  })
+  const codeWithChip = Object.values(tscircuitCoder.vfs)[
+    Object.keys(tscircuitCoder.vfs).length - 1
+  ]
+  expect(codeWithChip).toInclude("tssop20")
 
   expect(streamedChunks.length).toBeGreaterThan(0)
   const vfsKeys = Object.keys(tscircuitCoder.vfs)
