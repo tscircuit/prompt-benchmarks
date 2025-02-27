@@ -14,11 +14,9 @@ export interface TscircuitCoder {
   submitPrompt: ({
     prompt,
     options,
-    previousCode,
   }: {
     prompt: string
     options?: { selectedMicrocontroller?: string }
-    previousCode?: string
   }) => Promise<void>
   on<K extends keyof TscircuitCoderEvents>(
     event: K,
@@ -42,14 +40,11 @@ export class TscircuitCoderImpl extends EventEmitter implements TscircuitCoder {
 
   async submitPrompt({
     prompt,
-    previousCode,
     options,
   }: {
     prompt: string
-    previousCode?: string
     options?: { selectedMicrocontroller?: string }
   }): Promise<void> {
-    this.vfs = {}
     const systemPrompt = await createLocalCircuitPrompt()
     const promptNumber = Date.now()
     let currentAttempt = ""
@@ -70,7 +65,6 @@ export class TscircuitCoderImpl extends EventEmitter implements TscircuitCoder {
       prompt,
       systemPrompt,
       promptNumber,
-      previousCode,
       maxAttempts: 4,
       previousAttempts: [],
       onStream,

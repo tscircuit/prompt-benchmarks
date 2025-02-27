@@ -1,5 +1,6 @@
 import { createTscircuitCoder } from "lib/tscircuit-coder/tscircuitCoder"
 import { expect, test } from "bun:test"
+import { getFinalResult } from "lib/utils/get-final-result"
 
 test("TscircuitCoder submitPrompt streams and updates vfs", async () => {
   const streamedChunks: string[] = []
@@ -16,27 +17,18 @@ test("TscircuitCoder submitPrompt streams and updates vfs", async () => {
     prompt: "create bridge rectifier circuit",
   })
 
-  const rectifierCircuitCode = Object.values(tscircuitCoder.vfs)[
-    Object.keys(tscircuitCoder.vfs).length - 1
-  ]
-
   await tscircuitCoder.submitPrompt({
-    previousCode: rectifierCircuitCode,
     prompt: "add a sot23 transistor",
   })
 
-  const codeWithTransistor = Object.values(tscircuitCoder.vfs)[
-    Object.keys(tscircuitCoder.vfs).length - 1
-  ]
+  let codeWithTransistor = getFinalResult(tscircuitCoder.vfs)
   expect(codeWithTransistor).toInclude("sot23")
 
   await tscircuitCoder.submitPrompt({
-    previousCode: codeWithTransistor,
     prompt: "add a tssop20 chip",
   })
-  const codeWithChip = Object.values(tscircuitCoder.vfs)[
-    Object.keys(tscircuitCoder.vfs).length - 1
-  ]
+
+  let codeWithChip = getFinalResult(tscircuitCoder.vfs)
   expect(codeWithChip).toInclude("tssop20")
 
   expect(streamedChunks.length).toBeGreaterThan(0)

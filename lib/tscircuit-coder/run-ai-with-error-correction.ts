@@ -2,6 +2,7 @@ import { askAiWithPreviousAttempts } from "../ask-ai/ask-ai-with-previous-attemp
 import { saveAttemptLog } from "lib/utils/save-attempt"
 import type OpenAI from "openai"
 import { evaluateTscircuitCode } from "../utils/evaluate-tscircuit-code"
+import { getFinalResult } from "lib/utils/get-final-result"
 
 const createAttemptFile = ({
   fileName,
@@ -39,7 +40,6 @@ interface AttemptHistory {
 export const runAiWithErrorCorrection = async ({
   attempt = 1,
   maxAttempts,
-  previousCode,
   logsDir,
   systemPrompt,
   prompt,
@@ -50,7 +50,6 @@ export const runAiWithErrorCorrection = async ({
   vfs,
   openaiClient,
 }: {
-  previousCode?: string
   attempt?: number
   logsDir?: string
   maxAttempts: number
@@ -67,6 +66,8 @@ export const runAiWithErrorCorrection = async ({
   codeBlock: string
   error: string
 }> => {
+  let previousCode = getFinalResult(vfs)
+
   const aiResponse = await askAiWithPreviousAttempts({
     prompt,
     systemPrompt,
