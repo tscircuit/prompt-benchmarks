@@ -1,4 +1,5 @@
 import { openai } from "lib/ai/openai"
+import { getPrimarySourceCodeFromVfs } from "lib/utils/get-primary-source-code-from-vfs"
 
 interface AttemptHistory {
   code: string
@@ -8,14 +9,14 @@ interface AttemptHistory {
 export const askAiWithPreviousAttempts = async ({
   prompt,
   systemPrompt,
-  previousCode,
+  vfs,
   previousAttempts,
   onStream,
   openaiClient,
 }: {
   prompt: string
   systemPrompt: string
-  previousCode?: string
+  vfs?: Record<string, string>
   previousAttempts?: AttemptHistory[]
   onStream?: (chunk: string) => void
   openaiClient?: typeof openai
@@ -27,14 +28,16 @@ export const askAiWithPreviousAttempts = async ({
       { role: "user", content: prompt },
     ]
 
-  if (previousCode) {
+  const primarySourceCode = getPrimarySourceCodeFromVfs(vfs)
+
+  if (primarySourceCode) {
     messages.push({
       role: "assistant",
       content: "Please modify the code provided by the user.",
     })
     messages.push({
       role: "user",
-      content: previousCode,
+      content: primarySourceCode,
     })
   }
 

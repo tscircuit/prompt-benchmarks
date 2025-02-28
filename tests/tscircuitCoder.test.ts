@@ -1,6 +1,6 @@
 import { createTscircuitCoder } from "lib/tscircuit-coder/tscircuitCoder"
 import { expect, test } from "bun:test"
-import { getFinalResult } from "lib/utils/get-final-result"
+import { getPrimarySourceCodeFromVfs } from "lib/utils/get-primary-source-code-from-vfs"
 
 test("TscircuitCoder submitPrompt streams and updates vfs", async () => {
   const streamedChunks: string[] = []
@@ -18,18 +18,19 @@ test("TscircuitCoder submitPrompt streams and updates vfs", async () => {
   })
 
   await tscircuitCoder.submitPrompt({
-    prompt: "add a sot23 transistor",
+    prompt: "add a transistor component",
   })
 
-  let codeWithTransistor = getFinalResult(tscircuitCoder.vfs)
-  expect(codeWithTransistor).toInclude("sot23")
+  let codeWithTransistor = getPrimarySourceCodeFromVfs(tscircuitCoder.vfs)
+  expect(codeWithTransistor).toInclude("transistor")
 
   await tscircuitCoder.submitPrompt({
     prompt: "add a tssop20 chip",
   })
 
-  let codeWithChip = getFinalResult(tscircuitCoder.vfs)
+  let codeWithChip = getPrimarySourceCodeFromVfs(tscircuitCoder.vfs)
   expect(codeWithChip).toInclude("tssop20")
+  expect(codeWithChip).toInclude("transistor")
 
   expect(streamedChunks.length).toBeGreaterThan(0)
   const vfsKeys = Object.keys(tscircuitCoder.vfs)
