@@ -2,6 +2,7 @@ import { askAiWithPreviousAttempts } from "../ask-ai/ask-ai-with-previous-attemp
 import { saveAttemptLog } from "lib/utils/save-attempt"
 import type OpenAI from "openai"
 import { evaluateTscircuitCode } from "../utils/evaluate-tscircuit-code"
+import { getPrimarySourceCodeFromVfs } from "lib/utils/get-primary-source-code-from-vfs"
 
 const createAttemptFile = ({
   fileName,
@@ -68,6 +69,7 @@ export const runAiWithErrorCorrection = async ({
   const aiResponse = await askAiWithPreviousAttempts({
     prompt,
     systemPrompt,
+    vfs,
     previousAttempts,
     onStream,
     openaiClient,
