@@ -40,7 +40,7 @@ evalite("Reasoning Electronics Engineer", {
       maxAttempts: 4,
       logsDir,
       prompt: input.prompt,
-      promptId: ++promptNumber,
+      promptId: `prompt_${++promptNumber}`,
     })
 
     const output: {

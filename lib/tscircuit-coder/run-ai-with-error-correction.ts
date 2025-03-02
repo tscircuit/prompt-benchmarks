@@ -34,36 +34,31 @@ interface AttemptHistory {
   error: string
 }
 
-export const runAiWithErrorCorrection = async (
-  options: {
-    maxAttempts: number
-    promptId: number
-    logsDir?: string
-    prompt: string
-    systemPrompt: string
-    onStream?: (chunk: string) => void
-    onVfsChanged?: () => void
-  },
-  context: {
-    vfs?: Record<string, string>
-    openaiClient?: OpenAI
-  } = {},
-): Promise<{
+export const runAiWithErrorCorrection = async ({
+  maxAttempts,
+  promptId,
+  logsDir,
+  prompt,
+  systemPrompt,
+  onStream,
+  onVfsChanged,
+  vfs,
+  openaiClient,
+}: {
+  maxAttempts: number
+  promptId: string
+  logsDir?: string
+  prompt: string
+  systemPrompt: string
+  onStream?: (chunk: string) => void
+  onVfsChanged?: () => void
+  vfs?: Record<string, string>
+  openaiClient?: OpenAI
+}): Promise<{
   code: string
   codeBlock: string
   error: string
 }> => {
-  const {
-    maxAttempts,
-    logsDir,
-    prompt,
-    systemPrompt,
-    promptId,
-    onStream,
-    onVfsChanged,
-  } = options
-  const { vfs, openaiClient } = context
-
   const attempt = async (
     attemptNumber: number,
     previousAttempts: AttemptHistory[],
@@ -72,18 +67,14 @@ export const runAiWithErrorCorrection = async (
     codeBlock: string
     error: string
   }> => {
-    const aiResponse = await askAiWithPreviousAttempts(
-      {
-        prompt,
-        systemPrompt,
-        previousAttempts,
-        onStream,
-      },
-      {
-        vfs,
-        openaiClient,
-      },
-    )
+    const aiResponse = await askAiWithPreviousAttempts({
+      prompt,
+      systemPrompt,
+      previousAttempts,
+      onStream,
+      vfs,
+      openaiClient,
+    })
     const codeMatch = aiResponse.match(/```tsx\s*([\s\S]*?)\s*```/)
     const code = codeMatch ? codeMatch[1].trim() : ""
     const codeBlockMatch = aiResponse.match(/```tsx[\s\S]*?```/)

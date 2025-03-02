@@ -46,7 +46,7 @@ export class TscircuitCoderImpl extends EventEmitter implements TscircuitCoder {
     options?: { selectedMicrocontroller?: string }
   }): Promise<void> {
     const systemPrompt = await createLocalCircuitPrompt()
-    const promptId = Date.now()
+    const promptId = `prompt_${Date.now()}`
     let currentAttempt = ""
     let streamStarted = false
     const onStream = (chunk: string) => {
@@ -61,19 +61,15 @@ export class TscircuitCoderImpl extends EventEmitter implements TscircuitCoder {
       this.emit("vfsChanged")
     }
 
-    const result = await runAiWithErrorCorrection(
-      {
-        prompt,
-        systemPrompt,
-        promptId,
-        maxAttempts: 4,
-        onStream,
-        onVfsChanged,
-      },
-      {
-        vfs: this.vfs,
-      },
-    )
+    const result = await runAiWithErrorCorrection({
+      prompt,
+      systemPrompt,
+      promptId,
+      maxAttempts: 4,
+      onStream,
+      onVfsChanged,
+      vfs: this.vfs,
+    })
     if (result.code) {
       const filepath = `prompt-${promptId}-attempt-final.tsx`
       this.vfs[filepath] = result.code

@@ -35,7 +35,7 @@ evalite.experimental_skip("Electronics Engineer Making Random Circuits", {
       systemPrompt,
       logsDir,
       maxAttempts: 4,
-      promptId: ++promptNumber,
+      promptId: `prompt_${++promptNumber}`,
     })
 
     const output: {
