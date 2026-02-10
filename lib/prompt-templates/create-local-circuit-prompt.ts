@@ -237,19 +237,19 @@ ${cleanedPropsDoc}
    capValue = "100nF",
    distance = "2mm"
  }) => (
-   <group name={`decoupling-${capName}`}>
+   <group name={\`decoupling-\${capName}\`}>
      <capacitor
        name={capName}
        capacitance={capValue}
        footprint="0402"
-       decouplingFor={`${chipRef} .pin1`}
+       decouplingFor={\`\${chipRef} .pin1\`}
        decouplingTo="net.GND"
      />
      <constraint
        pcb={true}
        xDist={distance}
        left={chipRef}
-       right={`.${capName}`}
+       right={\`.\${capName}\`}
        centerToCenter={true}
      />
    </group>
@@ -282,10 +282,10 @@ ${cleanedPropsDoc}
   component on a circuit board.
 - Never use footprints that are not supported in the "All available footprints" section
 - Some footprints have a fixed number of pins like ms012 and sot723
-- `<trace />` components use CSS selectors in the `from` and `to` fields
+- \`<trace />\` components use CSS selectors in the \`from\` and \`to\` fields
   to connect components.
-- Any component can have a `name` prop
-- `pcbX` and `pcbY` are optional and default to 0.
+- Any component can have a \`name\` prop
+- \`pcbX\` and \`pcbY\` are optional and default to 0.
 - A board is centered on the origin (pcbX=0, pcbY=0), so to place a component
   at the center it must be placed at pcbX=0,pcbY=0. Similarly, if you're trying
   to layout components around the center, you would make ones to the left of
@@ -303,7 +303,7 @@ ${cleanedPropsDoc}
 
 ### Trace Reference Syntax
 
-Traces are created using the `<trace />` component. The `from` and `to`
+Traces are created using the \`<trace />\` component. The \`from\` and \`to\`
 fields are CSS selectors that reference the components to connect.
 
 Examples:
@@ -317,7 +317,7 @@ Examples:
 Use a codefence with the language "tsx" to wrap the code. You can use the
 current_code of the user as a starting point (if provided).
 
-You must export a higher-order component where the root component is `<board />`
+You must export a higher-order component where the root component is \`<board />\`
 inside the codefence. For example:
 
 \`\`\`tsx
