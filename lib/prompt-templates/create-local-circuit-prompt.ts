@@ -3,6 +3,7 @@ import {
   getFootprintSizes,
   fp,
 } from "@tscircuit/footprinter"
+import { fetchTSCircuitAIDocs } from "../utils/fetch-tscircuit-context"
 
 async function fetchFileContent(url: string): Promise<string> {
   try {
@@ -44,12 +45,17 @@ export const createLocalCircuitPrompt = async () => {
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
 
+  // Fetch comprehensive TSCircuit AI documentation
+  const tscircuitAIDocs = await fetchTSCircuitAIDocs()
+
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
-## tscircuit API overview
+## TSCircuit Comprehensive Documentation
+
+${tscircuitAIDocs ? `${tscircuitAIDocs}\n\n` : ''}## tscircuit API overview
 
 Here's an overview of the tscircuit API:
 
@@ -231,19 +237,19 @@ ${cleanedPropsDoc}
    capValue = "100nF",
    distance = "2mm"
  }) => (
-   <group name={\`decoupling-\${capName}\`}>
+   <group name={`decoupling-${capName}`}>
      <capacitor
        name={capName}
        capacitance={capValue}
        footprint="0402"
-       decouplingFor={\`\${chipRef} .pin1\`}
+       decouplingFor={`${chipRef} .pin1`}
        decouplingTo="net.GND"
      />
      <constraint
        pcb={true}
        xDist={distance}
        left={chipRef}
-       right={\`.\${capName}\`}
+       right={`.${capName}`}
        centerToCenter={true}
      />
    </group>
@@ -276,10 +282,10 @@ ${cleanedPropsDoc}
   component on a circuit board.
 - Never use footprints that are not supported in the "All available footprints" section
 - Some footprints have a fixed number of pins like ms012 and sot723
-- \`<trace />\` components use CSS selectors in the \`from\` and \`to\` fields
+- `<trace />` components use CSS selectors in the `from` and `to` fields
   to connect components.
-- Any component can have a \`name\` prop
-- \`pcbX\` and \`pcbY\` are optional and default to 0.
+- Any component can have a `name` prop
+- `pcbX` and `pcbY` are optional and default to 0.
 - A board is centered on the origin (pcbX=0, pcbY=0), so to place a component
   at the center it must be placed at pcbX=0,pcbY=0. Similarly, if you're trying
   to layout components around the center, you would make ones to the left of
@@ -297,7 +303,7 @@ ${cleanedPropsDoc}
 
 ### Trace Reference Syntax
 
-Traces are created using the \`<trace />\` component. The \`from\` and \`to\`
+Traces are created using the `<trace />` component. The `from` and `to`
 fields are CSS selectors that reference the components to connect.
 
 Examples:
@@ -311,7 +317,7 @@ Examples:
 Use a codefence with the language "tsx" to wrap the code. You can use the
 current_code of the user as a starting point (if provided).
 
-You must export a higher-order component where the root component is \`<board />\`
+You must export a higher-order component where the root component is `<board />`
 inside the codefence. For example:
 
 \`\`\`tsx
@@ -330,7 +336,7 @@ export const MyLed = () => (
 // ### Importing Components
 
 // You can import a variety of components from the tscircuit registry. tscircuit
-// registry components are always prefixed with \`@tsci/\`. Make sure to include
+// registry components are always prefixed with `@tsci/`. Make sure to include
 // your imports at the top of the codefence.
 
 // If you are not told explicitly that an import exists, do not import it.
