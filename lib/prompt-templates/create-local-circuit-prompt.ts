@@ -55,7 +55,7 @@ YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
 ## TSCircuit Comprehensive Documentation
 
-${tscircuitAIDocs ? `${tscircuitAIDocs}\n\n` : ''}## tscircuit API overview
+${tscircuitAIDocs ? `${tscircuitAIDocs}\n\n` : ""}## tscircuit API overview
 
 Here's an overview of the tscircuit API:
 

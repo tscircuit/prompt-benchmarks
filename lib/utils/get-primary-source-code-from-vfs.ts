@@ -3,8 +3,10 @@ export function getPrimarySourceCodeFromVfs(
 ): string | undefined {
   let code = undefined
   if (vfs && Object.keys(vfs).length !== 0) {
-    const finalResultKey = Object.keys(vfs)[Object.keys(vfs).length - 1]
-    if (finalResultKey.includes("final")) {
+    // Find all keys that include "final" and get the last one
+    const finalKeys = Object.keys(vfs).filter((key) => key.includes("final"))
+    if (finalKeys.length > 0) {
+      const finalResultKey = finalKeys[finalKeys.length - 1]
       code = vfs[finalResultKey]
     }
   }
