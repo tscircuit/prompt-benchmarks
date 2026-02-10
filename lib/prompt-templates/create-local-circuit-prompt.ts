@@ -3,6 +3,7 @@ import {
   getFootprintSizes,
   fp,
 } from "@tscircuit/footprinter"
+import { fetchTSCircuitAIDocs } from "../utils/fetch-tscircuit-context"
 
 async function fetchFileContent(url: string): Promise<string> {
   try {
@@ -44,12 +45,17 @@ export const createLocalCircuitPrompt = async () => {
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
 
+  // Fetch comprehensive TSCircuit AI documentation
+  const tscircuitAIDocs = await fetchTSCircuitAIDocs()
+
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
-## tscircuit API overview
+## TSCircuit Comprehensive Documentation
+
+${tscircuitAIDocs ? `${tscircuitAIDocs}\n\n` : ""}## tscircuit API overview
 
 Here's an overview of the tscircuit API:
 
@@ -330,7 +336,7 @@ export const MyLed = () => (
 // ### Importing Components
 
 // You can import a variety of components from the tscircuit registry. tscircuit
-// registry components are always prefixed with \`@tsci/\`. Make sure to include
+// registry components are always prefixed with `@tsci/`. Make sure to include
 // your imports at the top of the codefence.
 
 // If you are not told explicitly that an import exists, do not import it.
