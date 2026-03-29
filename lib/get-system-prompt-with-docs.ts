@@ -1,32 +1,37 @@
 import fs from "node:fs"
 import path from "node:path"
-import { BASE_SYSTEM_PROMPT } from "./base-system-prompt"
+import { getBaseSystemPromptText } from "./base-system-prompt"
 
-const DOCS_PATH = path.join(import.meta.dirname ?? __dirname, "../assets/tscircuit-docs.md")
+const CACHED_DOCS_PATH = path.join(
+  path.dirname(new URL(import.meta.url).pathname),
+  "../assets/tscircuit-docs.md",
+)
 
 /**
  * Returns the base system prompt without any docs appended.
- * Useful when you want to compare eval quality with/without the docs reference.
+ * Useful when you want to measure model performance without extra context.
  */
 export function getBaseSystemPrompt(): string {
-  return BASE_SYSTEM_PROMPT
+  return getBaseSystemPromptText()
 }
 
 /**
- * Returns the base system prompt with the cached tscircuit docs appended inside
- * a `<tscircuit_docs>` block.
- *
- * If `assets/tscircuit-docs.md` does not exist, falls back to the base prompt.
- * Run `npx tsx scripts/update-docs.ts` to populate the cache.
+ * Returns the base system prompt with cached component docs appended inside
+ * a `<tscircuit_docs>` XML block. Falls back to the base prompt if the cache
+ * file does not exist (run `bun scripts/update-docs.ts` to populate it).
  */
 export function getSystemPromptWithDocs(): string {
-  let docs = ""
-  try {
-    docs = fs.readFileSync(DOCS_PATH, "utf-8")
-  } catch {
-    // Cache file not present – return base prompt only
-    return BASE_SYSTEM_PROMPT
+  const base = getBaseSystemPromptText()
+
+  if (!fs.existsSync(CACHED_DOCS_PATH)) {
+    return base
   }
 
-  return `${BASE_SYSTEM_PROMPT}\n<tscircuit_docs>\n${docs}\n</tscircuit_docs>`
+  const docs = fs.readFileSync(CACHED_DOCS_PATH, "utf-8")
+
+  return `${base}
+<tscircuit_docs>
+${docs.trim()}
+</tscircuit_docs>
+`
 }
