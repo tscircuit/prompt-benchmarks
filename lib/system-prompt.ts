@@ -1,38 +1,48 @@
 import fs from "node:fs"
 import path from "node:path"
-import { BASE_SYSTEM_PROMPT } from "./base-system-prompt"
+import { getBaseSystemPromptText } from "./base-system-prompt"
 
-const DOCS_PATH = path.join(import.meta.dirname ?? __dirname, "../assets/tscircuit-docs.md")
+const CACHED_DOCS_PATH = path.join(
+  path.dirname(new URL(import.meta.url).pathname),
+  "../assets/tscircuit-docs.md",
+)
 
 /**
- * Returns the base system prompt, optionally appending cached tscircuit docs
- * wrapped in a `<tscircuit_docs>` block.
+ * Builds a system prompt that optionally appends cached component docs
+ * inside a `<tscircuit_docs>` XML block. Use this helper when you want
+ * to inject docs that were pre-fetched via `scripts/update-docs.ts`.
  *
- * Note: benchmarks that use `createLocalCircuitPrompt()` build their own prompt
- * inline. This helper is provided for eval scripts that want a pre-built prompt
- * with or without the cached docs appended.
- *
- * @param includeDocs - When true, the contents of `assets/tscircuit-docs.md`
- *   are appended (if the file exists).
+ * Note: benchmarks that call `createLocalCircuitPrompt()` build their prompt
+ * independently; this helper is intended for eval files that want a richer,
+ * docs-augmented prompt without the benchmark scaffolding overhead.
  */
-export function getSystemPrompt(includeDocs = false): string {
+export function buildSystemPrompt({
+  includeDocs = true,
+}: { includeDocs?: boolean } = {}): string {
+  const base = getBaseSystemPromptText()
+
   if (!includeDocs) {
-    return BASE_SYSTEM_PROMPT
+    return base
   }
 
-  let docs = ""
-  try {
-    docs = fs.readFileSync(DOCS_PATH, "utf-8")
-  } catch {
-    // Cache file not present – return base prompt only
-    return BASE_SYSTEM_PROMPT
+  let docs: string | null = null
+  if (fs.existsSync(CACHED_DOCS_PATH)) {
+    docs = fs.readFileSync(CACHED_DOCS_PATH, "utf-8")
   }
 
-  return `${BASE_SYSTEM_PROMPT}\n<tscircuit_docs>\n${docs}\n</tscircuit_docs>`
+  if (!docs) {
+    return base
+  }
+
+  return `${base}
+<tscircuit_docs>
+${docs.trim()}
+</tscircuit_docs>
+`
 }
 
-/**
- * The base system prompt without any docs appended.
- * Provided as a convenience export for cases where a static string is needed.
- */
-export const systemPrompt = BASE_SYSTEM_PROMPT
+/** Convenience export: base prompt without docs. */
+export const baseSystemPrompt = buildSystemPrompt({ includeDocs: false })
+
+/** Convenience export: base prompt with cached docs appended. */
+export const systemPromptWithDocs = buildSystemPrompt({ includeDocs: true })
