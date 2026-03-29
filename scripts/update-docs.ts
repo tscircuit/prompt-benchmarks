@@ -1,63 +1,29 @@
-/**
- * Script to fetch and cache the auto-generated tscircuit documentation.
- * Run this periodically to keep the docs up-to-date.
- *
- * Usage: npx tsx scripts/update-docs.ts
- */
+import fs from "node:fs"
+import path from "node:path"
 
-import * as fs from "fs"
-import * as path from "path"
+const REGISTRY_DOCS_URL =
+  "https://raw.githubusercontent.com/tscircuit/tscircuit/main/docs/tscircuit-docs.md"
 
-const DOCS_OUTPUT_PATH = path.join(process.cwd(), "assets", "tscircuit-docs.md")
-
-const DOCS_SOURCES = [
-  // tscircuit registry auto-generated docs
-  "https://registry-api.tscircuit.com/autorouting/docs/auto-generated",
-  // fallback: GitHub raw content
-  "https://raw.githubusercontent.com/tscircuit/tscircuit/main/docs/AUTO_GENERATED.md",
-]
-
-async function fetchDocs(): Promise<string | null> {
-  for (const url of DOCS_SOURCES) {
-    try {
-      console.log(`Trying to fetch docs from: ${url}`)
-      const response = await fetch(url)
-      if (response.ok) {
-        const text = await response.text()
-        if (text.trim().length > 0) {
-          console.log(`✓ Successfully fetched docs from: ${url}`)
-          return text
-        }
-      } else {
-        console.warn(`✗ Failed to fetch from ${url}: HTTP ${response.status}`)
-      }
-    } catch (e) {
-      console.warn(`✗ Error fetching from ${url}:`, e)
-    }
-  }
-  return null
-}
+const ASSETS_DIR = path.join(import.meta.dirname ?? __dirname, "../assets")
+const DOCS_PATH = path.join(ASSETS_DIR, "tscircuit-docs.md")
 
 async function main() {
-  const docs = await fetchDocs()
+  console.log(`Fetching docs from ${REGISTRY_DOCS_URL} …`)
 
-  if (!docs) {
-    console.error("Failed to fetch docs from any source.")
-    process.exit(1)
+  const res = await fetch(REGISTRY_DOCS_URL)
+  if (!res.ok) {
+    throw new Error(`Failed to fetch docs: ${res.status} ${res.statusText}`)
   }
 
-  // Ensure the assets directory exists
-  const assetsDir = path.dirname(DOCS_OUTPUT_PATH)
-  if (!fs.existsSync(assetsDir)) {
-    fs.mkdirSync(assetsDir, { recursive: true })
-  }
+  const content = await res.text()
 
-  fs.writeFileSync(DOCS_OUTPUT_PATH, docs, "utf-8")
-  console.log(`✓ Docs written to: ${DOCS_OUTPUT_PATH}`)
-  console.log(`  Size: ${(docs.length / 1024).toFixed(1)} KB`)
+  fs.mkdirSync(ASSETS_DIR, { recursive: true })
+  fs.writeFileSync(DOCS_PATH, content, "utf-8")
+
+  console.log(`✅ Docs written to ${DOCS_PATH} (${content.length} bytes)`)
 }
 
-main().catch((e) => {
-  console.error(e)
+main().catch((err) => {
+  console.error(err)
   process.exit(1)
 })
