@@ -1,48 +1,43 @@
 import fs from "node:fs"
 import path from "node:path"
-import { getBaseSystemPromptText } from "./base-system-prompt"
+import { getBaseSystemPrompt } from "./base-system-prompt"
 
-const CACHED_DOCS_PATH = path.join(
-  path.dirname(new URL(import.meta.url).pathname),
+const DOCS_PATH = path.join(
+  import.meta.dirname ?? __dirname,
   "../assets/tscircuit-docs.md",
 )
 
 /**
- * Builds a system prompt that optionally appends cached component docs
- * inside a `<tscircuit_docs>` XML block. Use this helper when you want
- * to inject docs that were pre-fetched via `scripts/update-docs.ts`.
+ * Returns the base system prompt without docs appended.
  *
- * Note: benchmarks that call `createLocalCircuitPrompt()` build their prompt
- * independently; this helper is intended for eval files that want a richer,
- * docs-augmented prompt without the benchmark scaffolding overhead.
+ * If you need the prompt with auto-generated component docs included, use
+ * `getSystemPromptWithCachedDocs()` (which wraps docs in a `<tscircuit_docs>`
+ * block) or the async `getSystemPrompt()` from `lib/get-system-prompt.ts`.
  */
-export function buildSystemPrompt({
-  includeDocs = true,
-}: { includeDocs?: boolean } = {}): string {
-  const base = getBaseSystemPromptText()
-
-  if (!includeDocs) {
-    return base
-  }
-
-  let docs: string | null = null
-  if (fs.existsSync(CACHED_DOCS_PATH)) {
-    docs = fs.readFileSync(CACHED_DOCS_PATH, "utf-8")
-  }
-
-  if (!docs) {
-    return base
-  }
-
-  return `${base}
-<tscircuit_docs>
-${docs.trim()}
-</tscircuit_docs>
-`
+export function getSystemPromptBase(): string {
+  return getBaseSystemPrompt()
 }
 
-/** Convenience export: base prompt without docs. */
-export const baseSystemPrompt = buildSystemPrompt({ includeDocs: false })
+/**
+ * Returns the base system prompt with auto-generated tscircuit component docs
+ * appended (read from the local `assets/tscircuit-docs.md` cache).
+ *
+ * The docs are wrapped in a `<tscircuit_docs>` XML block so that models can
+ * clearly distinguish the reference material from the instructions.
+ *
+ * Run `npx tsx scripts/update-docs.ts` to refresh the cached docs file.
+ */
+export function getSystemPromptWithCachedDocs(): string {
+  const base = getBaseSystemPrompt()
 
-/** Convenience export: base prompt with cached docs appended. */
-export const systemPromptWithDocs = buildSystemPrompt({ includeDocs: true })
+  if (!fs.existsSync(DOCS_PATH)) {
+    console.warn(
+      "[system-prompt] assets/tscircuit-docs.md not found — returning base prompt without docs. " +
+        "Run `npx tsx scripts/update-docs.ts` to generate it.",
+    )
+    return base
+  }
+
+  const docs = fs.readFileSync(DOCS_PATH, "utf-8")
+  return `${base}\n<tscircuit_docs>\n${docs}\n</tscircuit_docs>\n`
+}
