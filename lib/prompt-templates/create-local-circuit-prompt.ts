@@ -1,10 +1,13 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
-async function fetchFileContent(url: string): Promise<string> {
+async function fetchFileContent(
+  url: string,
+  { optional = false }: { optional?: boolean } = {},
+): Promise<string> {
   try {
     const response = await fetch(url)
     if (!response.ok) {
@@ -14,6 +17,7 @@ async function fetchFileContent(url: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
+    if (optional) return ""
     console.error("Error fetching file content:", error)
     throw error
   }
@@ -44,12 +48,20 @@ export const createLocalCircuitPrompt = async () => {
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
 
+  const generatedDocs = (
+    await fetchFileContent("https://docs.tscircuit.com/ai.txt", {
+      optional: true,
+    })
+  ).trim()
+
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
 ## tscircuit API overview
+
+${generatedDocs ? `### Generated tscircuit docs\n\n${generatedDocs}\n\n` : ""}
 
 Here's an overview of the tscircuit API:
 
