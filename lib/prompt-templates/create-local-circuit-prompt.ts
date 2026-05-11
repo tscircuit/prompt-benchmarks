@@ -1,7 +1,7 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
@@ -16,6 +16,16 @@ async function fetchFileContent(url: string): Promise<string> {
   } catch (error) {
     console.error("Error fetching file content:", error)
     throw error
+  }
+}
+
+async function fetchOptionalFileContent(url: string): Promise<string> {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return ""
+    return await response.text()
+  } catch {
+    return ""
   }
 }
 
@@ -38,6 +48,10 @@ export const createLocalCircuitPrompt = async () => {
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
     )) || ""
 
+  const generatedDocs = (
+    await fetchOptionalFileContent("https://docs.tscircuit.com/ai.txt")
+  ).trim()
+
   const cleanedPropsDoc = propsDoc
     .split("\n")
     .filter((line) => !line.startsWith("#"))
@@ -52,6 +66,17 @@ YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 ## tscircuit API overview
 
 Here's an overview of the tscircuit API:
+
+${
+  generatedDocs
+    ? `## Generated tscircuit docs
+
+The following documentation is generated from the current tscircuit docs site:
+
+${generatedDocs}
+`
+    : ""
+}
 
 <board width="10mm" height="10mm" /> // usually the root component
 <board outline={[{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]} /> // custom shape instead of rectangle
