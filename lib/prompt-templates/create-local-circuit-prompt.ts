@@ -1,7 +1,7 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
@@ -19,6 +19,35 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+const GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+const PROPS_DOC_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+
+let generatedDocsPromise: Promise<string> | undefined
+
+const fetchGeneratedDocs = async (): Promise<string> => {
+  generatedDocsPromise ??= (async () => {
+    try {
+      const response = await fetch(GENERATED_DOCS_URL)
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch generated docs: ${response.status} ${response.statusText}`,
+        )
+      }
+      return await response.text()
+    } catch (error) {
+      console.warn("Generated tscircuit docs unavailable:", error)
+      return ""
+    }
+  })()
+
+  return generatedDocsPromise
+}
+
+export const clearGeneratedDocsCacheForTests = () => {
+  generatedDocsPromise = undefined
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -33,10 +62,10 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const [propsDoc, generatedDocs] = await Promise.all([
+    fetchFileContent(PROPS_DOC_URL),
+    fetchGeneratedDocs(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -51,7 +80,17 @@ YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
 ## tscircuit API overview
 
-Here's an overview of the tscircuit API:
+${
+  generatedDocs
+    ? `### Generated tscircuit docs
+
+The following auto-generated documentation is loaded from ${GENERATED_DOCS_URL} and should be treated as the most current API reference:
+
+${generatedDocs}
+
+`
+    : ""
+}Here's an overview of the tscircuit API:
 
 <board width="10mm" height="10mm" /> // usually the root component
 <board outline={[{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]} /> // custom shape instead of rectangle
