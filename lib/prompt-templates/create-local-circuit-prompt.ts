@@ -1,7 +1,7 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
@@ -19,6 +19,25 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+const GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+
+let generatedDocsPromise: Promise<string> | null = null
+
+const fetchGeneratedDocs = async () => {
+  generatedDocsPromise ??= fetchFileContent(GENERATED_DOCS_URL).catch(
+    (error) => {
+      console.error("Error fetching generated tscircuit docs:", error)
+      return ""
+    },
+  )
+
+  return generatedDocsPromise
+}
+
+export const clearGeneratedDocsCacheForTests = () => {
+  generatedDocsPromise = null
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -33,10 +52,12 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
+  const [propsDoc, generatedDocs] = await Promise.all([
+    fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ),
+    fetchGeneratedDocs(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -44,11 +65,20 @@ export const createLocalCircuitPrompt = async () => {
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
 
+  const generatedDocsSection = generatedDocs.trim()
+    ? `
+## Generated tscircuit docs
+
+${generatedDocs.trim()}
+`
+    : ""
+
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
+${generatedDocsSection}
 ## tscircuit API overview
 
 Here's an overview of the tscircuit API:
