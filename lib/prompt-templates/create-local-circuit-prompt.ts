@@ -19,6 +19,15 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+function cleanMarkdownDoc(markdown: string): string {
+  return markdown
+    .split("\n")
+    .filter((line) => !line.startsWith("#"))
+    .join("\n")
+    .replace(/\n\n+/g, "\n\n")
+    .trim()
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -38,11 +47,12 @@ export const createLocalCircuitPrompt = async () => {
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
     )) || ""
 
-  const cleanedPropsDoc = propsDoc
-    .split("\n")
-    .filter((line) => !line.startsWith("#"))
-    .join("\n")
-    .replace(/\n\n+/g, "\n\n")
+  const cleanedPropsDoc = cleanMarkdownDoc(propsDoc)
+
+  const generatedDocs =
+    (await fetchFileContent("https://docs.tscircuit.com/ai.txt")) || ""
+
+  const cleanedGeneratedDocs = cleanMarkdownDoc(generatedDocs)
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -117,6 +127,13 @@ keep in mind that num_pins can be replaced with a number directly infront of the
 - Here is a documentation of all available components and their types:
 
 ${cleanedPropsDoc}
+
+### Generated tscircuit docs
+
+Use these generated docs as the newest source of truth for APIs, component
+usage, examples, and current tscircuit guidance:
+
+${cleanedGeneratedDocs}
 
 - Here is a list of unsupported components: 
 
