@@ -2,9 +2,11 @@ import { afterEach, describe, expect, it } from "bun:test"
 import { createLocalCircuitPrompt } from "lib/prompt-templates/create-local-circuit-prompt"
 
 const originalFetch = globalThis.fetch
+const originalSetTimeout = globalThis.setTimeout
 
 afterEach(() => {
   globalThis.fetch = originalFetch
+  globalThis.setTimeout = originalSetTimeout
 })
 
 describe("createLocalCircuitPrompt", () => {
@@ -47,6 +49,44 @@ describe("createLocalCircuitPrompt", () => {
           statusText: "Service Unavailable",
           text: async () => "",
         } as Response
+      }
+      if (
+        requestedUrl ===
+        "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+      ) {
+        return {
+          ok: true,
+          text: async () => "# Props\n\nPROP_COMPONENT_DOCS",
+        } as Response
+      }
+      throw new Error(`Unexpected fetch URL: ${requestedUrl}`)
+    }
+
+    const prompt = await createLocalCircuitPrompt()
+
+    expect(prompt).toContain("## Auto-generated tscircuit docs")
+    expect(prompt).toContain("<tscircuit_generated_docs>")
+    expect(prompt).toContain("</tscircuit_generated_docs>")
+    expect(prompt).toContain("PROP_COMPONENT_DOCS")
+  })
+
+  it("keeps building the prompt if the generated docs endpoint stalls", async () => {
+    globalThis.setTimeout = ((
+      handler: TimerHandler,
+      _timeout?: number,
+      ...args: any[]
+    ) => originalSetTimeout(handler, 0, ...args)) as typeof setTimeout
+
+    globalThis.fetch = async (url, init) => {
+      const requestedUrl = url.toString()
+      if (requestedUrl === "https://docs.tscircuit.com/ai.txt") {
+        return await new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener(
+            "abort",
+            () => reject(new DOMException("Aborted", "AbortError")),
+            { once: true },
+          )
+        })
       }
       if (
         requestedUrl ===

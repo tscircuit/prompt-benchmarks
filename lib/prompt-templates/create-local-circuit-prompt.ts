@@ -4,6 +4,8 @@ import {
   getFootprintSizes,
 } from "@tscircuit/footprinter"
 
+const OPTIONAL_FETCH_TIMEOUT_MS = 5000
+
 async function fetchFileContent(url: string): Promise<string> {
   try {
     const response = await fetch(url)
@@ -19,9 +21,23 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+async function fetchWithTimeout(
+  url: string,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    return await fetch(url, { signal: controller.signal })
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
 async function fetchOptionalFileContent(url: string): Promise<string> {
   try {
-    const response = await fetch(url)
+    const response = await fetchWithTimeout(url, OPTIONAL_FETCH_TIMEOUT_MS)
     if (!response.ok) return ""
     return await response.text()
   } catch {
