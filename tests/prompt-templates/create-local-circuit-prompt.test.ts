@@ -49,10 +49,13 @@ describe("createLocalCircuitPrompt", () => {
   })
 
   it("keeps building the prompt if generated docs are unavailable", async () => {
+    let generatedDocsFetchCount = 0
+
     globalThis.fetch = (async (input: RequestInfo | URL) => {
       const url = input.toString()
 
       if (url === "https://docs.tscircuit.com/ai.txt") {
+        generatedDocsFetchCount += 1
         return new Response("", { status: 503 })
       }
 
@@ -71,5 +74,38 @@ describe("createLocalCircuitPrompt", () => {
     expect(prompt).not.toContain("<tscircuit_generated_docs>")
     expect(prompt).toContain("PROP_COMPONENT_DOCS")
     expect(prompt).toContain("## tscircuit API overview")
+    expect(generatedDocsFetchCount).toBe(1)
+  })
+
+  it("does not cache empty generated docs after a transient fetch failure", async () => {
+    let generatedDocsFetchCount = 0
+
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = input.toString()
+
+      if (url === "https://docs.tscircuit.com/ai.txt") {
+        generatedDocsFetchCount += 1
+        if (generatedDocsFetchCount === 1) {
+          return new Response("", { status: 503 })
+        }
+        return new Response("RECOVERED_GENERATED_DOCS", { status: 200 })
+      }
+
+      if (
+        url ===
+        "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+      ) {
+        return new Response("# Props\n\nPROP_COMPONENT_DOCS", { status: 200 })
+      }
+
+      throw new Error(`Unexpected URL: ${url}`)
+    }) as typeof fetch
+
+    const firstPrompt = await createLocalCircuitPrompt()
+    const secondPrompt = await createLocalCircuitPrompt()
+
+    expect(firstPrompt).not.toContain("<tscircuit_generated_docs>")
+    expect(secondPrompt).toContain("RECOVERED_GENERATED_DOCS")
+    expect(generatedDocsFetchCount).toBe(2)
   })
 })

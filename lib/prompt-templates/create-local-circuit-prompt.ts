@@ -38,10 +38,17 @@ async function fetchOptionalFileContent(url: string): Promise<string> {
 }
 
 async function getGeneratedTscircuitDocs(): Promise<string> {
-  generatedDocsCache ??= await fetchOptionalFileContent(
+  if (generatedDocsCache !== undefined) {
+    return generatedDocsCache
+  }
+
+  const generatedDocs = await fetchOptionalFileContent(
     GENERATED_TSCIRCUIT_DOCS_URL,
   )
-  return generatedDocsCache
+  if (generatedDocs.trim()) {
+    generatedDocsCache = generatedDocs
+  }
+  return generatedDocs
 }
 
 export function clearCreateLocalCircuitPromptCacheForTests() {
