@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events"
+import { createLocalCircuitPrompt } from "lib/prompt-templates/create-local-circuit-prompt"
 import type { OpenAI } from "openai"
 import { runAiWithErrorCorrection } from "./run-ai-with-error-correction"
-import { createLocalCircuitPrompt } from "lib/prompt-templates/create-local-circuit-prompt"
 
 export interface TscircuitCoderEvents {
   streamedChunk: string
@@ -70,6 +70,7 @@ export class TscircuitCoderImpl extends EventEmitter implements TscircuitCoder {
       onStream,
       onVfsChanged,
       vfs: this.vfs,
+      openaiClient: this.openaiClient,
     })
     if (result.code) {
       const filepath = `prompt-${promptNumber}-attempt-final.tsx`

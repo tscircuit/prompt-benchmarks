@@ -14,8 +14,8 @@ async function fetchFileContent(url: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
-    console.error("Error fetching file content:", error)
-    throw error
+    console.warn(`Unable to fetch ${url}:`, error)
+    return ""
   }
 }
 
@@ -33,10 +33,17 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
+  const [generatedAiDoc, propsDoc] = await Promise.all([
+    fetchFileContent("https://docs.tscircuit.com/ai.txt"),
+    fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ),
+  ])
+
+  const cleanedGeneratedAiDoc = generatedAiDoc
+    .replace(/\r/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -44,10 +51,16 @@ export const createLocalCircuitPrompt = async () => {
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
 
+  const generatedDocsSection = cleanedGeneratedAiDoc
+    ? `## Auto-generated tscircuit docs\n\n${cleanedGeneratedAiDoc}\n`
+    : ""
+
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
+
+${generatedDocsSection}
 
 ## tscircuit API overview
 
