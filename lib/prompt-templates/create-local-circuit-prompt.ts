@@ -19,6 +19,16 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+async function fetchOptionalFileContent(url: string): Promise<string> {
+  try {
+    return await fetchFileContent(url)
+  } catch {
+    return ""
+  }
+}
+
+const AUTO_GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -33,10 +43,17 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
+  // Fetch the required props doc and the optional auto-generated docs feed
+  // in parallel. The generated docs are optional — if fetch fails, fall back
+  // to the existing handwritten overview so prompt creation never breaks.
+  const [propsDocRaw, generatedDocs] = await Promise.all([
+    fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ),
+    fetchOptionalFileContent(AUTO_GENERATED_DOCS_URL),
+  ])
+
+  const propsDoc = propsDocRaw || ""
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -44,12 +61,24 @@ export const createLocalCircuitPrompt = async () => {
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
 
+  const generatedDocsSection = generatedDocs.trim()
+    ? `## Auto-generated tscircuit docs
+
+The following is the latest auto-generated tscircuit documentation
+(${AUTO_GENERATED_DOCS_URL}). Treat it as authoritative when it conflicts
+with the handwritten overview below.
+
+${generatedDocs.trim()}
+
+`
+    : ""
+
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
-## tscircuit API overview
+${generatedDocsSection}## tscircuit API overview
 
 Here's an overview of the tscircuit API:
 
