@@ -1,9 +1,24 @@
 import { openai } from "lib/ai/openai"
 
+type PromptGenerationClient = {
+  chat: {
+    completions: {
+      create: (args: {
+        model: string
+        max_tokens: number
+        messages: Array<{ role: "user"; content: string }>
+      }) => Promise<{
+        choices: Array<{ message: { content: string | null } }>
+      }>
+    }
+  }
+}
+
 export const generateRandomPrompts = async (
   numberOfPrompts: number,
+  openaiClient: PromptGenerationClient = openai,
 ): Promise<string[]> => {
-  const completion = await openai.chat.completions.create({
+  const completion = await openaiClient.chat.completions.create({
     model: "gpt-4o-mini",
 
     max_tokens: 2048,
