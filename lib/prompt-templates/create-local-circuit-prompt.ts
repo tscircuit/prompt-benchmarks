@@ -19,6 +19,22 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+async function fetchOptionalFileContent(url: string): Promise<string> {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) {
+      console.warn(
+        `Skipping optional prompt context from ${url}: ${response.status} ${response.statusText}`,
+      )
+      return ""
+    }
+    return await response.text()
+  } catch (error) {
+    console.warn(`Skipping optional prompt context from ${url}:`, error)
+    return ""
+  }
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -37,6 +53,10 @@ export const createLocalCircuitPrompt = async () => {
     (await fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
     )) || ""
+
+  const generatedDocs = (
+    await fetchOptionalFileContent("https://docs.tscircuit.com/ai.txt")
+  ).trim()
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -117,6 +137,17 @@ keep in mind that num_pins can be replaced with a number directly infront of the
 - Here is a documentation of all available components and their types:
 
 ${cleanedPropsDoc}
+
+${
+  generatedDocs
+    ? `### Auto-generated tscircuit docs
+
+The following docs are generated from the current tscircuit documentation site:
+
+${generatedDocs}
+`
+    : ""
+}
 
 - Here is a list of unsupported components: 
 
