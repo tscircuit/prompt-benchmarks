@@ -136,5 +136,6 @@ export const runAiWithErrorCorrection = async ({
     promptNumber,
     previousAttempts,
     vfs,
+    openaiClient,
   })
 }

@@ -70,6 +70,7 @@ export class TscircuitCoderImpl extends EventEmitter implements TscircuitCoder {
       onStream,
       onVfsChanged,
       vfs: this.vfs,
+      openaiClient: this.openaiClient,
     })
     if (result.code) {
       const filepath = `prompt-${promptNumber}-attempt-final.tsx`

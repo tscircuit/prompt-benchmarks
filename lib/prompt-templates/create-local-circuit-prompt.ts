@@ -5,17 +5,21 @@ import {
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch file: ${response.status} ${response.statusText}`,
+    )
+  }
+  return await response.text()
+}
+
+async function fetchOptionalFileContent(url: string): Promise<string> {
   try {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch file: ${response.status} ${response.statusText}`,
-      )
-    }
-    return await response.text()
+    return await fetchFileContent(url)
   } catch (error) {
-    console.error("Error fetching file content:", error)
-    throw error
+    console.warn(`Optional prompt docs could not be loaded from ${url}:`, error)
+    return ""
   }
 }
 
@@ -33,10 +37,12 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
+  const [propsDoc, generatedDocs] = await Promise.all([
+    fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ),
+    fetchOptionalFileContent("https://docs.tscircuit.com/ai.txt"),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -48,6 +54,10 @@ export const createLocalCircuitPrompt = async () => {
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
+
+## Generated tscircuit docs
+
+${generatedDocs.trim() || "Generated docs were unavailable while building this prompt."}
 
 ## tscircuit API overview
 
