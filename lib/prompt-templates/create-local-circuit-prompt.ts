@@ -1,7 +1,7 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
@@ -19,6 +19,24 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+const generatedDocsUrl = "https://docs.tscircuit.com/ai.txt"
+let generatedDocsPromise: Promise<string> | undefined
+
+export function clearGeneratedDocsCacheForTests() {
+  generatedDocsPromise = undefined
+}
+
+async function fetchGeneratedDocs(): Promise<string> {
+  generatedDocsPromise ??= fetch(generatedDocsUrl)
+    .then((response) => {
+      if (!response.ok) return ""
+      return response.text()
+    })
+    .catch(() => "")
+
+  return generatedDocsPromise
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -33,10 +51,12 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
+  const [propsDoc, generatedDocs] = await Promise.all([
+    fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ),
+    fetchGeneratedDocs(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -50,6 +70,8 @@ You are an expert in electronic circuit design and tscircuit, and your job is to
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
 ## tscircuit API overview
+
+${generatedDocs ? `Generated tscircuit documentation:\n\n${generatedDocs}\n\n` : ""}
 
 Here's an overview of the tscircuit API:
 
