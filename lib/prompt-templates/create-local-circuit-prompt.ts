@@ -37,17 +37,28 @@ export const createLocalCircuitPrompt = async () => {
     (await fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
     )) || ""
+  const generatedDocs =
+    (await fetchFileContent("https://docs.tscircuit.com/ai.txt")) || ""
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
     .filter((line) => !line.startsWith("#"))
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
+  const cleanedGeneratedDocs = generatedDocs.trim()
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
+
+## Auto-generated tscircuit docs
+
+The following docs are generated from the current tscircuit documentation and
+should be treated as the most up-to-date reference for APIs, imports, and usage
+patterns:
+
+${cleanedGeneratedDocs}
 
 ## tscircuit API overview
 
