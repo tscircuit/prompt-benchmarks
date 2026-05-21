@@ -1,8 +1,8 @@
-import { askAiWithPreviousAttempts } from "../ask-ai/ask-ai-with-previous-attempts"
+import { getPrimarySourceCodeFromVfs } from "lib/utils/get-primary-source-code-from-vfs"
 import { saveAttemptLog } from "lib/utils/save-attempt"
 import type OpenAI from "openai"
+import { askAiWithPreviousAttempts } from "../ask-ai/ask-ai-with-previous-attempts"
 import { evaluateTscircuitCode } from "../utils/evaluate-tscircuit-code"
-import { getPrimarySourceCodeFromVfs } from "lib/utils/get-primary-source-code-from-vfs"
 
 const createAttemptFile = ({
   fileName,
@@ -136,5 +136,6 @@ export const runAiWithErrorCorrection = async ({
     promptNumber,
     previousAttempts,
     vfs,
+    openaiClient,
   })
 }

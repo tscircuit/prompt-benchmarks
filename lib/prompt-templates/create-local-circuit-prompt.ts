@@ -1,10 +1,17 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
-async function fetchFileContent(url: string): Promise<string> {
+const COMPONENT_TYPES_DOC_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+const GENERATED_AI_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+
+async function fetchFileContent(
+  url: string,
+  { optional = false }: { optional?: boolean } = {},
+): Promise<string> {
   try {
     const response = await fetch(url)
     if (!response.ok) {
@@ -14,9 +21,19 @@ async function fetchFileContent(url: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
+    if (optional) return ""
     console.error("Error fetching file content:", error)
     throw error
   }
+}
+
+function cleanMarkdownDoc(markdown: string) {
+  return markdown
+    .split("\n")
+    .filter((line) => !line.startsWith("#"))
+    .join("\n")
+    .replace(/\n\n+/g, "\n\n")
+    .trim()
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,22 +50,20 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const [propsDoc, generatedAiDocs] = await Promise.all([
+    fetchFileContent(COMPONENT_TYPES_DOC_URL),
+    fetchFileContent(GENERATED_AI_DOCS_URL, { optional: true }),
+  ])
 
-  const cleanedPropsDoc = propsDoc
-    .split("\n")
-    .filter((line) => !line.startsWith("#"))
-    .join("\n")
-    .replace(/\n\n+/g, "\n\n")
+  const cleanedPropsDoc = cleanMarkdownDoc(propsDoc)
+  const cleanedGeneratedAiDocs = cleanMarkdownDoc(generatedAiDocs)
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
+${cleanedGeneratedAiDocs ? `## Auto-generated tscircuit docs\n\nThese generated docs reflect the current tscircuit APIs and examples:\n\n${cleanedGeneratedAiDocs}\n\n` : ""}
 ## tscircuit API overview
 
 Here's an overview of the tscircuit API:

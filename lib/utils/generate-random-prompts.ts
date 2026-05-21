@@ -2,8 +2,9 @@ import { openai } from "lib/ai/openai"
 
 export const generateRandomPrompts = async (
   numberOfPrompts: number,
+  openaiClient: typeof openai = openai,
 ): Promise<string[]> => {
-  const completion = await openai.chat.completions.create({
+  const completion = await openaiClient.chat.completions.create({
     model: "gpt-4o-mini",
 
     max_tokens: 2048,
