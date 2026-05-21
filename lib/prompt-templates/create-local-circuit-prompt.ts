@@ -8,6 +8,8 @@ export const COMPONENT_TYPES_DOC_URL =
   "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
 export const GENERATED_TSCIRCUIT_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
 
+let generatedDocsPromise: Promise<string> | undefined
+
 async function fetchFileContent(
   url: string,
   { optional = false }: { optional?: boolean } = {},
@@ -29,6 +31,17 @@ async function fetchFileContent(
   }
 }
 
+const getGeneratedTscircuitDocs = () => {
+  generatedDocsPromise ??= fetchFileContent(GENERATED_TSCIRCUIT_DOCS_URL, {
+    optional: true,
+  })
+  return generatedDocsPromise
+}
+
+export const resetGeneratedTscircuitDocsCacheForTests = () => {
+  generatedDocsPromise = undefined
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -45,7 +58,7 @@ export const createLocalCircuitPrompt = async () => {
 
   const [propsDoc, generatedDocs] = await Promise.all([
     fetchFileContent(COMPONENT_TYPES_DOC_URL),
-    fetchFileContent(GENERATED_TSCIRCUIT_DOCS_URL, { optional: true }),
+    getGeneratedTscircuitDocs(),
   ])
 
   const cleanedPropsDoc = propsDoc

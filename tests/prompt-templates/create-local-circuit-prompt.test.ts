@@ -3,6 +3,7 @@ import {
   COMPONENT_TYPES_DOC_URL,
   GENERATED_TSCIRCUIT_DOCS_URL,
   createLocalCircuitPrompt,
+  resetGeneratedTscircuitDocsCacheForTests,
 } from "../../lib/prompt-templates/create-local-circuit-prompt"
 
 const originalFetch = globalThis.fetch
@@ -21,6 +22,7 @@ const mockFetch = (responses: Record<string, Response>) => {
 describe("createLocalCircuitPrompt", () => {
   afterEach(() => {
     globalThis.fetch = originalFetch
+    resetGeneratedTscircuitDocsCacheForTests()
   })
 
   it("includes the generated docs feed in the system prompt", async () => {
@@ -56,5 +58,30 @@ describe("createLocalCircuitPrompt", () => {
     expect(prompt).toContain("## tscircuit API overview")
     expect(prompt).toContain("chip docs")
     expect(prompt).not.toContain("## Auto-generated tscircuit docs")
+  })
+
+  it("caches generated docs during the process", async () => {
+    const fetchCounts = new Map<string, number>()
+
+    globalThis.fetch = async (input) => {
+      const url = input.toString()
+      fetchCounts.set(url, (fetchCounts.get(url) ?? 0) + 1)
+
+      if (url === COMPONENT_TYPES_DOC_URL) {
+        return new Response("# Component Types\n\nresistor docs")
+      }
+
+      if (url === GENERATED_TSCIRCUIT_DOCS_URL) {
+        return new Response("Generated docs: cached once.")
+      }
+
+      return new Response("not found", { status: 404, statusText: "Not Found" })
+    }
+
+    await createLocalCircuitPrompt()
+    await createLocalCircuitPrompt()
+
+    expect(fetchCounts.get(COMPONENT_TYPES_DOC_URL)).toBe(2)
+    expect(fetchCounts.get(GENERATED_TSCIRCUIT_DOCS_URL)).toBe(1)
   })
 })
