@@ -41,6 +41,9 @@ describe("createLocalCircuitPrompt", () => {
     expect(prompt).toContain(
       "Generated docs: use <jumper /> for solder jumpers.",
     )
+    expect(prompt.indexOf("## Auto-generated tscircuit docs")).toBeLessThan(
+      prompt.indexOf("## tscircuit API overview"),
+    )
     expect(prompt).toContain("resistor docs")
   })
 
