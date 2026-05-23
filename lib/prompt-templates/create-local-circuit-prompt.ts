@@ -1,10 +1,19 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
-async function fetchFileContent(url: string): Promise<string> {
+const GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+const COMPONENT_TYPES_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+
+let generatedDocsPromise: Promise<string> | null = null
+
+async function fetchFileContent(
+  url: string,
+  { logErrors = true }: { logErrors?: boolean } = {},
+): Promise<string> {
   try {
     const response = await fetch(url)
     if (!response.ok) {
@@ -14,9 +23,23 @@ async function fetchFileContent(url: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
-    console.error("Error fetching file content:", error)
+    if (logErrors) {
+      console.error("Error fetching file content:", error)
+    }
     throw error
   }
+}
+
+async function fetchOptionalGeneratedDocsContext(): Promise<string> {
+  generatedDocsPromise ??= fetchFileContent(GENERATED_DOCS_URL, {
+    logErrors: false,
+  }).catch(() => "")
+
+  return generatedDocsPromise
+}
+
+export function __resetGeneratedDocsCacheForTests() {
+  generatedDocsPromise = null
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,10 +56,10 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const [propsDoc, generatedDocsContext] = await Promise.all([
+    fetchFileContent(COMPONENT_TYPES_URL),
+    fetchOptionalGeneratedDocsContext(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -116,6 +139,7 @@ keep in mind that num_pins can be replaced with a number directly infront of the
 
 - Here is a documentation of all available components and their types:
 
+${generatedDocsContext ? `### Generated tscircuit docs\n\n${generatedDocsContext}\n\n` : ""}
 ${cleanedPropsDoc}
 
 - Here is a list of unsupported components: 
