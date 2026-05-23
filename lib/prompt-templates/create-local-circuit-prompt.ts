@@ -4,7 +4,16 @@ import {
   fp,
 } from "@tscircuit/footprinter"
 
-async function fetchFileContent(url: string): Promise<string> {
+const COMPONENT_TYPES_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+const GENERATED_TSCIRCUIT_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+
+let generatedDocsPromise: Promise<string> | null = null
+
+async function fetchFileContent(
+  url: string,
+  { logErrors = true }: { logErrors?: boolean } = {},
+): Promise<string> {
   try {
     const response = await fetch(url)
     if (!response.ok) {
@@ -14,9 +23,23 @@ async function fetchFileContent(url: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
-    console.error("Error fetching file content:", error)
+    if (logErrors) {
+      console.error("Error fetching file content:", error)
+    }
     throw error
   }
+}
+
+async function fetchOptionalGeneratedDocs(): Promise<string> {
+  generatedDocsPromise ??= fetchFileContent(GENERATED_TSCIRCUIT_DOCS_URL, {
+    logErrors: false,
+  }).catch(() => "")
+
+  return generatedDocsPromise
+}
+
+export function __resetGeneratedDocsCacheForTests() {
+  generatedDocsPromise = null
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,10 +56,10 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const [propsDoc, generatedDocs] = await Promise.all([
+    fetchFileContent(COMPONENT_TYPES_URL),
+    fetchOptionalGeneratedDocs(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -44,12 +67,24 @@ export const createLocalCircuitPrompt = async () => {
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
 
+  const generatedDocsSection = generatedDocs.trim()
+    ? `## Auto-generated tscircuit docs
+
+The following content comes from ${GENERATED_TSCIRCUIT_DOCS_URL}. Treat it as
+the most current tscircuit documentation when it conflicts with the handwritten
+overview below.
+
+${generatedDocs.trim()}
+
+`
+    : ""
+
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
-## tscircuit API overview
+${generatedDocsSection}## tscircuit API overview
 
 Here's an overview of the tscircuit API:
 
