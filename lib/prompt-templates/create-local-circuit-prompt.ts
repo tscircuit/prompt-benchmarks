@@ -31,11 +31,15 @@ async function fetchFileContent(
   }
 }
 
-const getGeneratedTscircuitDocs = () => {
+const getGeneratedTscircuitDocs = async () => {
   generatedDocsPromise ??= fetchFileContent(GENERATED_TSCIRCUIT_DOCS_URL, {
     optional: true,
   })
-  return generatedDocsPromise
+  const generatedDocs = await generatedDocsPromise
+  if (!generatedDocs.trim()) {
+    generatedDocsPromise = undefined
+  }
+  return generatedDocs
 }
 
 export const resetGeneratedTscircuitDocsCacheForTests = () => {

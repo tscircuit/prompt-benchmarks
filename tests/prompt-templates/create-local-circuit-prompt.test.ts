@@ -84,4 +84,36 @@ describe("createLocalCircuitPrompt", () => {
     expect(fetchCounts.get(COMPONENT_TYPES_DOC_URL)).toBe(2)
     expect(fetchCounts.get(GENERATED_TSCIRCUIT_DOCS_URL)).toBe(1)
   })
+
+  it("retries generated docs after a transient failure", async () => {
+    let generatedDocsAttempts = 0
+
+    globalThis.fetch = async (input) => {
+      const url = input.toString()
+
+      if (url === COMPONENT_TYPES_DOC_URL) {
+        return new Response("# Component Types\n\nresistor docs")
+      }
+
+      if (url === GENERATED_TSCIRCUIT_DOCS_URL) {
+        generatedDocsAttempts += 1
+        if (generatedDocsAttempts === 1) {
+          return new Response("temporarily unavailable", {
+            status: 503,
+            statusText: "Service Unavailable",
+          })
+        }
+        return new Response("Generated docs: recovered after retry.")
+      }
+
+      return new Response("not found", { status: 404, statusText: "Not Found" })
+    }
+
+    const promptAfterFailure = await createLocalCircuitPrompt()
+    const promptAfterRetry = await createLocalCircuitPrompt()
+
+    expect(promptAfterFailure).not.toContain("## Auto-generated tscircuit docs")
+    expect(promptAfterRetry).toContain("Generated docs: recovered after retry.")
+    expect(generatedDocsAttempts).toBe(2)
+  })
 })
