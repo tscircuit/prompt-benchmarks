@@ -1,10 +1,13 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
-async function fetchFileContent(url: string): Promise<string> {
+async function fetchFileContent(
+  url: string,
+  options?: { logErrors?: boolean },
+): Promise<string> {
   try {
     const response = await fetch(url)
     if (!response.ok) {
@@ -14,9 +17,32 @@ async function fetchFileContent(url: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
-    console.error("Error fetching file content:", error)
+    if (options?.logErrors !== false) {
+      console.error("Error fetching file content:", error)
+    }
     throw error
   }
+}
+
+let generatedDocsPromise: Promise<string> | undefined
+
+async function fetchGeneratedDocs(): Promise<string> {
+  if (!generatedDocsPromise) {
+    generatedDocsPromise = fetchFileContent(
+      "https://docs.tscircuit.com/ai.txt",
+      {
+        logErrors: false,
+      },
+    )
+      .then((docs) => docs.trim())
+      .catch(() => "")
+  }
+
+  return generatedDocsPromise
+}
+
+export function resetGeneratedDocsCacheForTests() {
+  generatedDocsPromise = undefined
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,10 +59,12 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
+  const [generatedDocs, propsDoc] = await Promise.all([
+    fetchGeneratedDocs(),
+    fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -52,6 +80,8 @@ YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 ## tscircuit API overview
 
 Here's an overview of the tscircuit API:
+
+${generatedDocs ? `### Generated tscircuit docs\n\n${generatedDocs}\n` : ""}
 
 <board width="10mm" height="10mm" /> // usually the root component
 <board outline={[{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]} /> // custom shape instead of rectangle

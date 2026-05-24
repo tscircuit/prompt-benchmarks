@@ -1,8 +1,13 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import { generateRandomPrompts } from "../../lib/utils/generate-random-prompts"
 
+const openAiIt =
+  process.env.RUN_OPENAI_TESTS === "1" && process.env.OPENAI_API_KEY
+    ? it
+    : it.skip
+
 describe("generateRandomPrompts", () => {
-  it("should return an array of prompts", async () => {
+  openAiIt("should return an array of prompts", async () => {
     const prompts = await generateRandomPrompts(3)
 
     expect(Array.isArray(prompts)).toBe(true)
