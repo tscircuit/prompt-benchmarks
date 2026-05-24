@@ -1,7 +1,7 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
@@ -19,6 +19,26 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+const GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+let generatedDocsPromise: Promise<string> | null = null
+
+async function fetchGeneratedDocs(): Promise<string> {
+  if (!generatedDocsPromise) {
+    generatedDocsPromise = fetchFileContent(GENERATED_DOCS_URL).catch(
+      (error) => {
+        console.error("Error fetching generated tscircuit docs:", error)
+        return ""
+      },
+    )
+  }
+
+  return generatedDocsPromise
+}
+
+export const resetGeneratedDocsCacheForTesting = () => {
+  generatedDocsPromise = null
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -33,16 +53,28 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
+  const [propsDoc, generatedDocs] = await Promise.all([
+    fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ),
+    fetchGeneratedDocs(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
     .filter((line) => !line.startsWith("#"))
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
+
+  const generatedDocsSection = generatedDocs
+    ? `### Generated tscircuit docs
+
+The following generated docs are the current reference for tscircuit APIs, components, props, and usage patterns:
+
+${generatedDocs.trim()}
+
+`
+    : ""
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -113,6 +145,8 @@ ${footprintParams}
 keep in mind that num_pins can be replaced with a number directly infront of the footprint name like so: dip8_p1.27mm which means num_pins=8, don't do that for footprints with fixed number of pins like ms012 and sot723
 
 ### Components and Props
+
+${generatedDocsSection}
 
 - Here is a documentation of all available components and their types:
 
