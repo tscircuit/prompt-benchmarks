@@ -19,6 +19,24 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+let generatedDocsCache: string | null = null
+
+export const __resetGeneratedDocsCacheForTests = () => {
+  generatedDocsCache = null
+}
+
+async function getGeneratedDocsContent(): Promise<string> {
+  if (generatedDocsCache !== null) return generatedDocsCache
+
+  try {
+    generatedDocsCache = await fetchFileContent("https://docs.tscircuit.com/ai.txt")
+  } catch {
+    generatedDocsCache = ""
+  }
+
+  return generatedDocsCache
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -43,6 +61,7 @@ export const createLocalCircuitPrompt = async () => {
     .filter((line) => !line.startsWith("#"))
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
+  const generatedDocsContent = await getGeneratedDocsContent()
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -52,6 +71,8 @@ YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 ## tscircuit API overview
 
 Here's an overview of the tscircuit API:
+
+${generatedDocsContent ? `## Auto-generated tscircuit docs\n\n${generatedDocsContent}` : ""}
 
 <board width="10mm" height="10mm" /> // usually the root component
 <board outline={[{x: 0, y: 0}, {x: 10, y: 0}, {x: 10, y: 10}, {x: 0, y: 10}]} /> // custom shape instead of rectangle
