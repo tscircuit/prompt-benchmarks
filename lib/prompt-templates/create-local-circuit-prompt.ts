@@ -1,22 +1,85 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
-async function fetchFileContent(url: string): Promise<string> {
-  try {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch file: ${response.status} ${response.statusText}`,
-      )
-    }
-    return await response.text()
-  } catch (error) {
-    console.error("Error fetching file content:", error)
-    throw error
+const COMPONENT_TYPES_DOC_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+const GENERATED_TSCIRCUIT_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+const GENERATED_TSCIRCUIT_DOCS_TIMEOUT_MS = 1_500
+
+let generatedTscircuitDocsCache: string | undefined
+let generatedTscircuitDocsTimeoutMs = GENERATED_TSCIRCUIT_DOCS_TIMEOUT_MS
+
+async function fetchFileContent(
+  url: string,
+  init?: RequestInit,
+): Promise<string> {
+  const response = await fetch(url, init)
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch file: ${response.status} ${response.statusText}`,
+    )
   }
+  return await response.text()
+}
+
+async function fetchOptionalFileContent(
+  url: string,
+  timeoutMs: number,
+): Promise<string> {
+  const abortController = new AbortController()
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+  try {
+    return await Promise.race([
+      fetchFileContent(url, { signal: abortController.signal }),
+      new Promise<string>((resolve) => {
+        timeoutId = setTimeout(() => {
+          abortController.abort()
+          resolve("")
+        }, timeoutMs)
+      }),
+    ])
+  } catch (error) {
+    console.warn(`Optional prompt docs unavailable: ${url}`, error)
+    return ""
+  } finally {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId)
+    }
+  }
+}
+
+function cleanMarkdownDoc(doc: string): string {
+  return doc.trim().replace(/\n\n+/g, "\n\n")
+}
+
+async function getGeneratedTscircuitDocs(): Promise<string> {
+  if (generatedTscircuitDocsCache !== undefined) {
+    return generatedTscircuitDocsCache
+  }
+
+  const generatedDocs = cleanMarkdownDoc(
+    await fetchOptionalFileContent(
+      GENERATED_TSCIRCUIT_DOCS_URL,
+      generatedTscircuitDocsTimeoutMs,
+    ),
+  )
+
+  generatedTscircuitDocsCache = generatedDocs
+
+  return generatedDocs
+}
+
+export function resetGeneratedTscircuitDocsCacheForTests() {
+  generatedTscircuitDocsCache = undefined
+  generatedTscircuitDocsTimeoutMs = GENERATED_TSCIRCUIT_DOCS_TIMEOUT_MS
+}
+
+export function setGeneratedTscircuitDocsTimeoutForTests(timeoutMs: number) {
+  generatedTscircuitDocsTimeoutMs = timeoutMs
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,10 +96,10 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const [propsDoc, generatedTscircuitDocs] = await Promise.all([
+    fetchFileContent(COMPONENT_TYPES_DOC_URL),
+    getGeneratedTscircuitDocs(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -44,11 +107,20 @@ export const createLocalCircuitPrompt = async () => {
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
 
+  const generatedTscircuitDocsSection = generatedTscircuitDocs
+    ? `## Auto-generated tscircuit documentation
+
+${generatedTscircuitDocs}
+
+`
+    : ""
+
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
+${generatedTscircuitDocsSection}
 ## tscircuit API overview
 
 Here's an overview of the tscircuit API:
