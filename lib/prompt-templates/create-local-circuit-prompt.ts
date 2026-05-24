@@ -4,6 +4,8 @@ import {
   fp,
 } from "@tscircuit/footprinter"
 
+const TSCIRCUIT_AI_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+
 async function fetchFileContent(url: string): Promise<string> {
   try {
     const response = await fetch(url)
@@ -17,6 +19,14 @@ async function fetchFileContent(url: string): Promise<string> {
     console.error("Error fetching file content:", error)
     throw error
   }
+}
+
+function cleanMarkdownDoc(doc: string): string {
+  return doc
+    .split("\n")
+    .filter((line) => !line.startsWith("#"))
+    .join("\n")
+    .replace(/\n\n+/g, "\n\n")
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,16 +43,10 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const tscircuitAiDocs =
+    (await fetchFileContent(TSCIRCUIT_AI_DOCS_URL)) || ""
 
-  const cleanedPropsDoc = propsDoc
-    .split("\n")
-    .filter((line) => !line.startsWith("#"))
-    .join("\n")
-    .replace(/\n\n+/g, "\n\n")
+  const cleanedTscircuitAiDocs = cleanMarkdownDoc(tscircuitAiDocs)
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -112,11 +116,11 @@ ${footprintParams}
 
 keep in mind that num_pins can be replaced with a number directly infront of the footprint name like so: dip8_p1.27mm which means num_pins=8, don't do that for footprints with fixed number of pins like ms012 and sot723
 
-### Components and Props
+### Auto-generated tscircuit docs super context
 
-- Here is a documentation of all available components and their types:
+The following context is fetched from ${TSCIRCUIT_AI_DOCS_URL}. It is auto-generated and kept up to date by the tscircuit docs site. Prefer this documentation over stale hand-written component notes when deciding which props, components, and patterns are supported.
 
-${cleanedPropsDoc}
+${cleanedTscircuitAiDocs}
 
 - Here is a list of unsupported components: 
 
