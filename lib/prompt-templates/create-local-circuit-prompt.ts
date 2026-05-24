@@ -7,11 +7,16 @@ import {
 const COMPONENT_TYPES_DOC_URL =
   "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
 const GENERATED_TSCIRCUIT_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+const GENERATED_TSCIRCUIT_DOCS_TIMEOUT_MS = 1_500
 
 let generatedTscircuitDocsCache: string | undefined
+let generatedTscircuitDocsTimeoutMs = GENERATED_TSCIRCUIT_DOCS_TIMEOUT_MS
 
-async function fetchFileContent(url: string): Promise<string> {
-  const response = await fetch(url)
+async function fetchFileContent(
+  url: string,
+  init?: RequestInit,
+): Promise<string> {
+  const response = await fetch(url, init)
   if (!response.ok) {
     throw new Error(
       `Failed to fetch file: ${response.status} ${response.statusText}`,
@@ -20,12 +25,30 @@ async function fetchFileContent(url: string): Promise<string> {
   return await response.text()
 }
 
-async function fetchOptionalFileContent(url: string): Promise<string> {
+async function fetchOptionalFileContent(
+  url: string,
+  timeoutMs: number,
+): Promise<string> {
+  const abortController = new AbortController()
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+
   try {
-    return await fetchFileContent(url)
+    return await Promise.race([
+      fetchFileContent(url, { signal: abortController.signal }),
+      new Promise<string>((resolve) => {
+        timeoutId = setTimeout(() => {
+          abortController.abort()
+          resolve("")
+        }, timeoutMs)
+      }),
+    ])
   } catch (error) {
     console.warn(`Optional prompt docs unavailable: ${url}`, error)
     return ""
+  } finally {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId)
+    }
   }
 }
 
@@ -39,18 +62,24 @@ async function getGeneratedTscircuitDocs(): Promise<string> {
   }
 
   const generatedDocs = cleanMarkdownDoc(
-    await fetchOptionalFileContent(GENERATED_TSCIRCUIT_DOCS_URL),
+    await fetchOptionalFileContent(
+      GENERATED_TSCIRCUIT_DOCS_URL,
+      generatedTscircuitDocsTimeoutMs,
+    ),
   )
 
-  if (generatedDocs) {
-    generatedTscircuitDocsCache = generatedDocs
-  }
+  generatedTscircuitDocsCache = generatedDocs
 
   return generatedDocs
 }
 
 export function resetGeneratedTscircuitDocsCacheForTests() {
   generatedTscircuitDocsCache = undefined
+  generatedTscircuitDocsTimeoutMs = GENERATED_TSCIRCUIT_DOCS_TIMEOUT_MS
+}
+
+export function setGeneratedTscircuitDocsTimeoutForTests(timeoutMs: number) {
+  generatedTscircuitDocsTimeoutMs = timeoutMs
 }
 
 export const createLocalCircuitPrompt = async () => {
