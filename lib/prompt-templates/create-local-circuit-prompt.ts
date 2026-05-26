@@ -4,9 +4,22 @@ import {
   fp,
 } from "@tscircuit/footprinter"
 
-async function fetchFileContent(url: string): Promise<string> {
+const GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+const COMPONENT_TYPES_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+const GENERATED_DOCS_FETCH_TIMEOUT_MS = 2_500
+
+type FetchFileContentOptions = {
+  logErrors?: boolean
+  signal?: AbortSignal
+}
+
+async function fetchFileContent(
+  url: string,
+  options: FetchFileContentOptions = {},
+): Promise<string> {
   try {
-    const response = await fetch(url)
+    const response = await fetch(url, { signal: options.signal })
     if (!response.ok) {
       throw new Error(
         `Failed to fetch file: ${response.status} ${response.statusText}`,
@@ -14,9 +27,45 @@ async function fetchFileContent(url: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
-    console.error("Error fetching file content:", error)
+    if (options.logErrors !== false) {
+      console.error("Error fetching file content:", error)
+    }
     throw error
   }
+}
+
+let generatedDocsPromise: Promise<string> | null = null
+
+async function fetchGeneratedDocsWithTimeout(): Promise<string> {
+  const abortController = new AbortController()
+  const timeout = setTimeout(
+    () => abortController.abort(),
+    GENERATED_DOCS_FETCH_TIMEOUT_MS,
+  )
+
+  try {
+    return (
+      await fetchFileContent(GENERATED_DOCS_URL, {
+        logErrors: false,
+        signal: abortController.signal,
+      })
+    ).trim()
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function fetchOptionalGeneratedDocs(): Promise<string> {
+  generatedDocsPromise ??= fetchGeneratedDocsWithTimeout().catch(() => {
+    generatedDocsPromise = null
+    return ""
+  })
+
+  return generatedDocsPromise
+}
+
+export function resetGeneratedDocsCacheForTests() {
+  generatedDocsPromise = null
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,10 +82,10 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const [propsDoc, generatedDocs] = await Promise.all([
+    fetchFileContent(COMPONENT_TYPES_URL),
+    fetchOptionalGeneratedDocs(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
@@ -49,6 +98,7 @@ You are an expert in electronic circuit design and tscircuit, and your job is to
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
+${generatedDocs ? `## Auto-generated tscircuit docs\n\nThe following docs are generated from the current tscircuit docs site. Prefer them when they clarify current component usage, imports, layout helpers, or API changes.\n\n${generatedDocs}\n` : ""}
 ## tscircuit API overview
 
 Here's an overview of the tscircuit API:
