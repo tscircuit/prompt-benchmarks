@@ -1,7 +1,7 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
@@ -19,6 +19,23 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+let generatedDocsPromise: Promise<string> | null = null
+
+export function resetGeneratedDocsCacheForTests() {
+  generatedDocsPromise = null
+}
+
+async function fetchGeneratedDocs(): Promise<string> {
+  generatedDocsPromise ??= fetchFileContent("https://docs.tscircuit.com/ai.txt")
+    .then((content) => content.trim())
+    .catch((error) => {
+      console.error("Error fetching generated docs:", error)
+      return ""
+    })
+
+  return generatedDocsPromise
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -33,16 +50,28 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
+  const [propsDoc, generatedDocs] = await Promise.all([
+    fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ),
+    fetchGeneratedDocs(),
+  ])
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
     .filter((line) => !line.startsWith("#"))
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
+
+  const generatedDocsSection = generatedDocs
+    ? `
+### Auto-generated tscircuit docs
+
+Use this generated docs reference when it has newer guidance than the hand-written examples above:
+
+${generatedDocs}
+`
+    : ""
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -117,6 +146,7 @@ keep in mind that num_pins can be replaced with a number directly infront of the
 - Here is a documentation of all available components and their types:
 
 ${cleanedPropsDoc}
+${generatedDocsSection}
 
 - Here is a list of unsupported components: 
 
