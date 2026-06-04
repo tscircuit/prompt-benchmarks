@@ -4,6 +4,12 @@ import {
   fp,
 } from "@tscircuit/footprinter"
 
+export const GENERATED_PROPS_DOC_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+
+export const GENERATED_PROPS_OVERVIEW_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/PROPS_OVERVIEW.md"
+
 async function fetchFileContent(url: string): Promise<string> {
   try {
     const response = await fetch(url)
@@ -17,6 +23,15 @@ async function fetchFileContent(url: string): Promise<string> {
     console.error("Error fetching file content:", error)
     throw error
   }
+}
+
+export function cleanGeneratedDoc(doc: string): string {
+  return doc
+    .split("\n")
+    .filter((line) => !line.startsWith("#"))
+    .join("\n")
+    .replace(/\n\n+/g, "\n\n")
+    .trim()
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,16 +48,13 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const [propsDoc, propsOverviewDoc] = await Promise.all([
+    fetchFileContent(GENERATED_PROPS_DOC_URL),
+    fetchFileContent(GENERATED_PROPS_OVERVIEW_URL),
+  ])
 
-  const cleanedPropsDoc = propsDoc
-    .split("\n")
-    .filter((line) => !line.startsWith("#"))
-    .join("\n")
-    .replace(/\n\n+/g, "\n\n")
+  const cleanedPropsDoc = cleanGeneratedDoc(propsDoc)
+  const cleanedPropsOverviewDoc = cleanGeneratedDoc(propsOverviewDoc)
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -114,7 +126,14 @@ keep in mind that num_pins can be replaced with a number directly infront of the
 
 ### Components and Props
 
-- Here is a documentation of all available components and their types:
+- Here is the auto-generated props overview. Prefer these prop names and
+  component capabilities when deciding how to express layouts, footprints,
+  ports, nets, silkscreen, constraints, and PCB placement:
+
+${cleanedPropsOverviewDoc}
+
+- Here is the auto-generated documentation of all available components and
+  their types:
 
 ${cleanedPropsDoc}
 
