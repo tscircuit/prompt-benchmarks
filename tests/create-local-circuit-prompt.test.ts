@@ -8,6 +8,8 @@ const originalFetch = globalThis.fetch
 const generatedDocsUrl = "https://docs.tscircuit.com/ai.txt"
 const componentTypesUrl =
   "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+const propsOverviewUrl =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/PROPS_OVERVIEW.md"
 
 beforeEach(() => {
   resetGeneratedDocsCacheForTests()
@@ -24,6 +26,8 @@ test("includes generated tscircuit docs when available", async () => {
       new Response("Generated docs: prefer net aliases for shared rails."),
     ],
     propsDoc: "# Component Types\n\n## resistor\n\nUse resistance prop.",
+    propsOverviewDoc:
+      "# @tscircuit/props Overview\n\nUse chipProps.parse for validation.",
   })
 
   const prompt = await createLocalCircuitPrompt()
@@ -31,6 +35,7 @@ test("includes generated tscircuit docs when available", async () => {
   expect(prompt).toContain("## Auto-generated tscircuit docs")
   expect(prompt).toContain("Generated docs: prefer net aliases")
   expect(prompt).toContain("Use resistance prop.")
+  expect(prompt).toContain("Use chipProps.parse for validation.")
 })
 
 test("continues with component docs when generated docs are unavailable", async () => {
@@ -39,12 +44,15 @@ test("continues with component docs when generated docs are unavailable", async 
       new Response("missing", { status: 404, statusText: "Not Found" }),
     ],
     propsDoc: "# Component Types\n\n## capacitor\n\nUse capacitance prop.",
+    propsOverviewDoc:
+      "# @tscircuit/props Overview\n\nUse capacitorProps for validation.",
   })
 
   const prompt = await createLocalCircuitPrompt()
 
   expect(prompt).not.toContain("## Auto-generated tscircuit docs")
   expect(prompt).toContain("Use capacitance prop.")
+  expect(prompt).toContain("Use capacitorProps for validation.")
   expect(prompt).toContain("YOU MUST ABIDE BY THE RULES IN THE RULES SECTION")
 })
 
@@ -53,6 +61,7 @@ test("caches successful generated docs across prompt builds", async () => {
   mockPromptDocsFetch({
     generatedDocsResponses: [new Response("Cached generated docs")],
     propsDoc: "# Component Types\n\n## led\n\nLED props.",
+    propsOverviewDoc: "# @tscircuit/props Overview\n\nLED prop overview.",
     onRequest: (url) => calls.push(url),
   })
 
@@ -61,6 +70,7 @@ test("caches successful generated docs across prompt builds", async () => {
 
   expect(calls.filter((url) => url === generatedDocsUrl)).toHaveLength(1)
   expect(calls.filter((url) => url === componentTypesUrl)).toHaveLength(2)
+  expect(calls.filter((url) => url === propsOverviewUrl)).toHaveLength(2)
 })
 
 test("retries generated docs after a failed fetch", async () => {
@@ -73,6 +83,7 @@ test("retries generated docs after a failed fetch", async () => {
       new Response("Recovered generated docs"),
     ],
     propsDoc: "# Component Types\n\n## diode\n\nDiode props.",
+    propsOverviewDoc: "# @tscircuit/props Overview\n\nDiode prop overview.",
   })
 
   const firstPrompt = await createLocalCircuitPrompt()
@@ -85,10 +96,12 @@ test("retries generated docs after a failed fetch", async () => {
 function mockPromptDocsFetch({
   generatedDocsResponses,
   propsDoc,
+  propsOverviewDoc,
   onRequest,
 }: {
   generatedDocsResponses: Response[]
   propsDoc: string
+  propsOverviewDoc: string
   onRequest?: (url: string) => void
 }) {
   globalThis.fetch = (async (input, init) => {
@@ -102,6 +115,10 @@ function mockPromptDocsFetch({
 
     if (url === componentTypesUrl) {
       return new Response(propsDoc, { status: 200 })
+    }
+
+    if (url === propsOverviewUrl) {
+      return new Response(propsOverviewDoc, { status: 200 })
     }
 
     return new Response(`Unexpected URL: ${url}`, { status: 500 })

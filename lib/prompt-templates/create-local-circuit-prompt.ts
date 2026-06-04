@@ -7,6 +7,8 @@ import {
 const GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
 const COMPONENT_TYPES_URL =
   "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+const PROPS_OVERVIEW_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/PROPS_OVERVIEW.md"
 const GENERATED_DOCS_FETCH_TIMEOUT_MS = 2_500
 
 type FetchFileContentOptions = {
@@ -68,6 +70,14 @@ export function resetGeneratedDocsCacheForTests() {
   generatedDocsPromise = null
 }
 
+function cleanGeneratedMarkdownDoc(markdown: string): string {
+  return markdown
+    .split("\n")
+    .filter((line) => !line.startsWith("#"))
+    .join("\n")
+    .replace(/\n\n+/g, "\n\n")
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -82,16 +92,16 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const [propsDoc, generatedDocs] = await Promise.all([
-    fetchFileContent(COMPONENT_TYPES_URL),
-    fetchOptionalGeneratedDocs(),
-  ])
+  const [componentTypesDoc, propsOverviewDoc, generatedDocs] = await Promise.all(
+    [
+      fetchFileContent(COMPONENT_TYPES_URL),
+      fetchFileContent(PROPS_OVERVIEW_URL),
+      fetchOptionalGeneratedDocs(),
+    ],
+  )
 
-  const cleanedPropsDoc = propsDoc
-    .split("\n")
-    .filter((line) => !line.startsWith("#"))
-    .join("\n")
-    .replace(/\n\n+/g, "\n\n")
+  const cleanedComponentTypesDoc = cleanGeneratedMarkdownDoc(componentTypesDoc)
+  const cleanedPropsOverviewDoc = cleanGeneratedMarkdownDoc(propsOverviewDoc)
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -166,7 +176,13 @@ keep in mind that num_pins can be replaced with a number directly infront of the
 
 - Here is a documentation of all available components and their types:
 
-${cleanedPropsDoc}
+#### Component Types
+
+${cleanedComponentTypesDoc}
+
+#### Props Overview
+
+${cleanedPropsOverviewDoc}
 
 - Here is a list of unsupported components: 
 
