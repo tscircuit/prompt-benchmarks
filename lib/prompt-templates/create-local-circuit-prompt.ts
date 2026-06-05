@@ -1,7 +1,7 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
@@ -36,13 +36,18 @@ export const createLocalCircuitPrompt = async () => {
   const propsDoc =
     (await fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ).catch(() => "")) || ""
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
     .filter((line) => !line.startsWith("#"))
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
+
+  const aiTxtContent =
+    (await fetchFileContent("https://docs.tscircuit.com/ai.txt").catch(
+      () => "",
+    )) || ""
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -123,6 +128,10 @@ ${cleanedPropsDoc}
 1- powersource
 2- powersourcesimple
 3- pinheader
+
+### Helpful Docs and Examples
+
+${aiTxtContent}
 
 - Here are examples of how you can take advantage of those props: 
 
