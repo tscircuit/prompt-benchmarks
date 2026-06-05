@@ -4,9 +4,25 @@ import {
   fp,
 } from "@tscircuit/footprinter"
 
-async function fetchFileContent(url: string): Promise<string> {
+const GENERATED_DOCS_URL = "https://docs.tscircuit.com/llms.txt"
+const LEGACY_GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+const COMPONENT_TYPES_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
+const PROPS_OVERVIEW_URL =
+  "https://raw.githubusercontent.com/tscircuit/props/main/generated/PROPS_OVERVIEW.md"
+const GENERATED_DOCS_FETCH_TIMEOUT_MS = 2_500
+
+type FetchFileContentOptions = {
+  logErrors?: boolean
+  signal?: AbortSignal
+}
+
+async function fetchFileContent(
+  url: string,
+  options: FetchFileContentOptions = {},
+): Promise<string> {
   try {
-    const response = await fetch(url)
+    const response = await fetch(url, { signal: options.signal })
     if (!response.ok) {
       throw new Error(
         `Failed to fetch file: ${response.status} ${response.statusText}`,
@@ -14,9 +30,68 @@ async function fetchFileContent(url: string): Promise<string> {
     }
     return await response.text()
   } catch (error) {
-    console.error("Error fetching file content:", error)
+    if (options.logErrors !== false) {
+      console.error("Error fetching file content:", error)
+    }
     throw error
   }
+}
+
+let generatedDocsPromise: Promise<string> | null = null
+
+async function fetchGeneratedDocsUrlWithTimeout(url: string): Promise<string> {
+  const abortController = new AbortController()
+  const timeout = setTimeout(
+    () => abortController.abort(),
+    GENERATED_DOCS_FETCH_TIMEOUT_MS,
+  )
+
+  try {
+    return (
+      await fetchFileContent(url, {
+        logErrors: false,
+        signal: abortController.signal,
+      })
+    ).trim()
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function fetchGeneratedDocsWithTimeout(): Promise<string> {
+  let lastError: unknown = null
+
+  for (const url of [GENERATED_DOCS_URL, LEGACY_GENERATED_DOCS_URL]) {
+    try {
+      const docs = await fetchGeneratedDocsUrlWithTimeout(url)
+      if (docs) return docs
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError ?? new Error("No generated tscircuit docs available")
+}
+
+async function fetchOptionalGeneratedDocs(): Promise<string> {
+  generatedDocsPromise ??= fetchGeneratedDocsWithTimeout().catch(() => {
+    generatedDocsPromise = null
+    return ""
+  })
+
+  return generatedDocsPromise
+}
+
+export function resetGeneratedDocsCacheForTests() {
+  generatedDocsPromise = null
+}
+
+function cleanGeneratedMarkdownDoc(markdown: string): string {
+  return markdown
+    .split("\n")
+    .filter((line) => !line.startsWith("#"))
+    .join("\n")
+    .replace(/\n\n+/g, "\n\n")
 }
 
 export const createLocalCircuitPrompt = async () => {
@@ -33,22 +108,23 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
-  const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+  const [componentTypesDoc, propsOverviewDoc, generatedDocs] = await Promise.all(
+    [
+      fetchFileContent(COMPONENT_TYPES_URL),
+      fetchFileContent(PROPS_OVERVIEW_URL),
+      fetchOptionalGeneratedDocs(),
+    ],
+  )
 
-  const cleanedPropsDoc = propsDoc
-    .split("\n")
-    .filter((line) => !line.startsWith("#"))
-    .join("\n")
-    .replace(/\n\n+/g, "\n\n")
+  const cleanedComponentTypesDoc = cleanGeneratedMarkdownDoc(componentTypesDoc)
+  const cleanedPropsOverviewDoc = cleanGeneratedMarkdownDoc(propsOverviewDoc)
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
 
 YOU MUST ABIDE BY THE RULES IN THE RULES SECTION
 
+${generatedDocs ? `## Auto-generated tscircuit docs\n\nThe following docs are generated from the current tscircuit docs site. Prefer them when they clarify current component usage, imports, layout helpers, or API changes.\n\n${generatedDocs}\n` : ""}
 ## tscircuit API overview
 
 Here's an overview of the tscircuit API:
@@ -116,7 +192,13 @@ keep in mind that num_pins can be replaced with a number directly infront of the
 
 - Here is a documentation of all available components and their types:
 
-${cleanedPropsDoc}
+#### Component Types
+
+${cleanedComponentTypesDoc}
+
+#### Props Overview
+
+${cleanedPropsOverviewDoc}
 
 - Here is a list of unsupported components: 
 
