@@ -5,7 +5,8 @@ import {
 } from "lib/prompt-templates/create-local-circuit-prompt"
 
 const originalFetch = globalThis.fetch
-const generatedDocsUrl = "https://docs.tscircuit.com/ai.txt"
+const generatedDocsUrl = "https://docs.tscircuit.com/llms.txt"
+const legacyGeneratedDocsUrl = "https://docs.tscircuit.com/ai.txt"
 const componentTypesUrl =
   "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
 const propsOverviewUrl =
@@ -42,6 +43,7 @@ test("continues with component docs when generated docs are unavailable", async 
   mockPromptDocsFetch({
     generatedDocsResponses: [
       new Response("missing", { status: 404, statusText: "Not Found" }),
+      new Response("missing", { status: 404, statusText: "Not Found" }),
     ],
     propsDoc: "# Component Types\n\n## capacitor\n\nUse capacitance prop.",
     propsOverviewDoc:
@@ -69,13 +71,37 @@ test("caches successful generated docs across prompt builds", async () => {
   await createLocalCircuitPrompt()
 
   expect(calls.filter((url) => url === generatedDocsUrl)).toHaveLength(1)
+  expect(calls.filter((url) => url === legacyGeneratedDocsUrl)).toHaveLength(0)
   expect(calls.filter((url) => url === componentTypesUrl)).toHaveLength(2)
   expect(calls.filter((url) => url === propsOverviewUrl)).toHaveLength(2)
+})
+
+test("falls back to legacy generated docs URL", async () => {
+  const calls: string[] = []
+  mockPromptDocsFetch({
+    generatedDocsResponses: [
+      new Response("missing", { status: 404, statusText: "Not Found" }),
+      new Response("Legacy generated docs"),
+    ],
+    propsDoc: "# Component Types\n\n## chip\n\nChip props.",
+    propsOverviewDoc: "# @tscircuit/props Overview\n\nChip prop overview.",
+    onRequest: (url) => calls.push(url),
+  })
+
+  const prompt = await createLocalCircuitPrompt()
+
+  expect(prompt).toContain("Legacy generated docs")
+  expect(calls.filter((url) => url === generatedDocsUrl)).toHaveLength(1)
+  expect(calls.filter((url) => url === legacyGeneratedDocsUrl)).toHaveLength(1)
 })
 
 test("retries generated docs after a failed fetch", async () => {
   mockPromptDocsFetch({
     generatedDocsResponses: [
+      new Response("temporary failure", {
+        status: 503,
+        statusText: "Service Unavailable",
+      }),
       new Response("temporary failure", {
         status: 503,
         statusText: "Service Unavailable",
@@ -108,7 +134,7 @@ function mockPromptDocsFetch({
     const url = input.toString()
     onRequest?.(url)
 
-    if (url === generatedDocsUrl) {
+    if (url === generatedDocsUrl || url === legacyGeneratedDocsUrl) {
       expect(init?.signal).toBeInstanceOf(AbortSignal)
       return generatedDocsResponses.shift() ?? new Response("", { status: 200 })
     }

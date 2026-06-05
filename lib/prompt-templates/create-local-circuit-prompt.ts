@@ -4,7 +4,8 @@ import {
   fp,
 } from "@tscircuit/footprinter"
 
-const GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+const GENERATED_DOCS_URL = "https://docs.tscircuit.com/llms.txt"
+const LEGACY_GENERATED_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
 const COMPONENT_TYPES_URL =
   "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
 const PROPS_OVERVIEW_URL =
@@ -38,7 +39,7 @@ async function fetchFileContent(
 
 let generatedDocsPromise: Promise<string> | null = null
 
-async function fetchGeneratedDocsWithTimeout(): Promise<string> {
+async function fetchGeneratedDocsUrlWithTimeout(url: string): Promise<string> {
   const abortController = new AbortController()
   const timeout = setTimeout(
     () => abortController.abort(),
@@ -47,7 +48,7 @@ async function fetchGeneratedDocsWithTimeout(): Promise<string> {
 
   try {
     return (
-      await fetchFileContent(GENERATED_DOCS_URL, {
+      await fetchFileContent(url, {
         logErrors: false,
         signal: abortController.signal,
       })
@@ -55,6 +56,21 @@ async function fetchGeneratedDocsWithTimeout(): Promise<string> {
   } finally {
     clearTimeout(timeout)
   }
+}
+
+async function fetchGeneratedDocsWithTimeout(): Promise<string> {
+  let lastError: unknown = null
+
+  for (const url of [GENERATED_DOCS_URL, LEGACY_GENERATED_DOCS_URL]) {
+    try {
+      const docs = await fetchGeneratedDocsUrlWithTimeout(url)
+      if (docs) return docs
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError ?? new Error("No generated tscircuit docs available")
 }
 
 async function fetchOptionalGeneratedDocs(): Promise<string> {
