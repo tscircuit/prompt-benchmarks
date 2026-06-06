@@ -6,7 +6,10 @@ import {
 
 export const COMPONENT_TYPES_DOC_URL =
   "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md"
-export const GENERATED_TSCIRCUIT_DOCS_URL = "https://docs.tscircuit.com/ai.txt"
+export const GENERATED_TSCIRCUIT_DOCS_URL =
+  "https://docs.tscircuit.com/llms.txt"
+export const LEGACY_GENERATED_TSCIRCUIT_DOCS_URL =
+  "https://docs.tscircuit.com/ai.txt"
 export const GENERATED_TSCIRCUIT_DOCS_TIMEOUT_MS = 1500
 
 let generatedDocsPromise: Promise<string> | undefined
@@ -67,10 +70,20 @@ const fetchOptionalFileContentWithTimeout = async (
 }
 
 const getGeneratedTscircuitDocs = async () => {
-  generatedDocsPromise ??= fetchOptionalFileContentWithTimeout(
-    GENERATED_TSCIRCUIT_DOCS_URL,
-    generatedDocsTimeoutMs,
-  )
+  generatedDocsPromise ??= (async () => {
+    const primaryDocs = await fetchOptionalFileContentWithTimeout(
+      GENERATED_TSCIRCUIT_DOCS_URL,
+      generatedDocsTimeoutMs,
+    )
+    if (primaryDocs.trim()) {
+      return primaryDocs
+    }
+
+    return fetchOptionalFileContentWithTimeout(
+      LEGACY_GENERATED_TSCIRCUIT_DOCS_URL,
+      generatedDocsTimeoutMs,
+    )
+  })()
   const generatedDocs = await generatedDocsPromise
   if (!generatedDocs.trim()) {
     generatedDocsPromise = undefined

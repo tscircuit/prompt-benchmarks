@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test"
 import {
   COMPONENT_TYPES_DOC_URL,
   GENERATED_TSCIRCUIT_DOCS_URL,
+  LEGACY_GENERATED_TSCIRCUIT_DOCS_URL,
   createLocalCircuitPrompt,
   resetGeneratedTscircuitDocsCacheForTests,
   setGeneratedTscircuitDocsTimeoutForTests,
@@ -51,10 +52,36 @@ describe("createLocalCircuitPrompt", () => {
     expect(prompt).toContain("resistor docs")
   })
 
+  it("falls back to the legacy generated docs feed", async () => {
+    mockFetch({
+      [COMPONENT_TYPES_DOC_URL]: new Response(
+        "# Component Types\n\nresistor docs",
+      ),
+      [GENERATED_TSCIRCUIT_DOCS_URL]: new Response("not found", {
+        status: 404,
+        statusText: "Not Found",
+      }),
+      [LEGACY_GENERATED_TSCIRCUIT_DOCS_URL]: new Response(
+        "Legacy generated docs: use <jumper /> for solder jumpers.",
+      ),
+    })
+
+    const prompt = await createLocalCircuitPrompt()
+
+    expect(prompt).toContain("## Auto-generated tscircuit docs")
+    expect(prompt).toContain(
+      "Legacy generated docs: use <jumper /> for solder jumpers.",
+    )
+  })
+
   it("still builds the prompt when generated docs are unavailable", async () => {
     mockFetch({
       [COMPONENT_TYPES_DOC_URL]: new Response("# Component Types\n\nchip docs"),
       [GENERATED_TSCIRCUIT_DOCS_URL]: new Response("server error", {
+        status: 500,
+        statusText: "Internal Server Error",
+      }),
+      [LEGACY_GENERATED_TSCIRCUIT_DOCS_URL]: new Response("server error", {
         status: 500,
         statusText: "Internal Server Error",
       }),
@@ -82,6 +109,10 @@ describe("createLocalCircuitPrompt", () => {
         return new Response("Generated docs: cached once.")
       }
 
+      if (url === LEGACY_GENERATED_TSCIRCUIT_DOCS_URL) {
+        return new Response("Legacy generated docs: should not be fetched.")
+      }
+
       return new Response("not found", { status: 404, statusText: "Not Found" })
     }
 
@@ -90,6 +121,7 @@ describe("createLocalCircuitPrompt", () => {
 
     expect(fetchCounts.get(COMPONENT_TYPES_DOC_URL)).toBe(2)
     expect(fetchCounts.get(GENERATED_TSCIRCUIT_DOCS_URL)).toBe(1)
+    expect(fetchCounts.get(LEGACY_GENERATED_TSCIRCUIT_DOCS_URL)).toBeUndefined()
   })
 
   it("retries generated docs after a transient failure", async () => {
@@ -111,6 +143,13 @@ describe("createLocalCircuitPrompt", () => {
           })
         }
         return new Response("Generated docs: recovered after retry.")
+      }
+
+      if (url === LEGACY_GENERATED_TSCIRCUIT_DOCS_URL) {
+        return new Response("legacy docs unavailable", {
+          status: 503,
+          statusText: "Service Unavailable",
+        })
       }
 
       return new Response("not found", { status: 404, statusText: "Not Found" })
@@ -150,6 +189,13 @@ describe("createLocalCircuitPrompt", () => {
           })
         }
         return new Response("Generated docs: recovered after timeout.")
+      }
+
+      if (url === LEGACY_GENERATED_TSCIRCUIT_DOCS_URL) {
+        return new Response("legacy docs unavailable", {
+          status: 503,
+          statusText: "Service Unavailable",
+        })
       }
 
       return new Response("not found", { status: 404, statusText: "Not Found" })
