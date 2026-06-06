@@ -2,7 +2,7 @@ import { createTscircuitCoder } from "lib/tscircuit-coder/tscircuitCoder"
 import { expect, test } from "bun:test"
 import { getPrimarySourceCodeFromVfs } from "lib/utils/get-primary-source-code-from-vfs"
 
-test("TscircuitCoder submitPrompt streams and updates vfs", async () => {
+test.skipIf(!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "dummy-key")("TscircuitCoder submitPrompt streams and updates vfs", async () => {
   const streamedChunks: string[] = []
   let vfsUpdated = false
   const tscircuitCoder = createTscircuitCoder()
