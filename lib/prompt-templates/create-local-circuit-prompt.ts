@@ -19,6 +19,12 @@ async function fetchFileContent(url: string): Promise<string> {
   }
 }
 
+let aiDocsCache: string | null = null
+
+export const resetAiDocsCache = () => {
+  aiDocsCache = null
+}
+
 export const createLocalCircuitPrompt = async () => {
   const footprintNamesByType = getFootprintNamesByType()
   const footprintSizes = getFootprintSizes()
@@ -33,16 +39,33 @@ export const createLocalCircuitPrompt = async () => {
     "",
   )
 
+  if (aiDocsCache === null) {
+    try {
+      const response = await fetch("https://docs.tscircuit.com/ai.txt")
+      if (response.ok) {
+        aiDocsCache = await response.text()
+      } else {
+        aiDocsCache = ""
+      }
+    } catch (e) {
+      aiDocsCache = ""
+    }
+  }
+
   const propsDoc =
     (await fetchFileContent(
       "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    ).catch(() => "")) || ""
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
     .filter((line) => !line.startsWith("#"))
     .join("\n")
     .replace(/\n\n+/g, "\n\n")
+
+  const aiDocsSection = aiDocsCache
+    ? `\n### Auto-generated tscircuit docs\n\n${aiDocsCache}\n`
+    : ""
 
   return `
 You are an expert in electronic circuit design and tscircuit, and your job is to create a circuit board in tscircuit with the user-provided description.
@@ -113,7 +136,7 @@ ${footprintParams}
 keep in mind that num_pins can be replaced with a number directly infront of the footprint name like so: dip8_p1.27mm which means num_pins=8, don't do that for footprints with fixed number of pins like ms012 and sot723
 
 ### Components and Props
-
+${aiDocsSection}
 - Here is a documentation of all available components and their types:
 
 ${cleanedPropsDoc}
