@@ -1,7 +1,7 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
 
 async function fetchFileContent(url: string): Promise<string> {
@@ -34,9 +34,7 @@ export const createLocalCircuitPrompt = async () => {
   )
 
   const propsDoc =
-    (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
-    )) || ""
+    (await fetchFileContent("https://docs.tscircuit.com/ai.txt")) || ""
 
   const cleanedPropsDoc = propsDoc
     .split("\n")
