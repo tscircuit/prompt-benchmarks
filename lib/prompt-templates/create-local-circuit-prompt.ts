@@ -35,7 +35,11 @@ export const createLocalCircuitPrompt = async () => {
 
   const propsDoc =
     (await fetchFileContent(
-      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
+      "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_DOCS.md",
+    ).catch(() =>
+      fetchFileContent(
+        "https://raw.githubusercontent.com/tscircuit/props/main/generated/COMPONENT_TYPES.md",
+      ),
     )) || ""
 
   const cleanedPropsDoc = propsDoc
