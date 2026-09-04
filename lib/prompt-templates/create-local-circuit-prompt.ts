@@ -1,8 +1,22 @@
 import {
+  fp,
   getFootprintNamesByType,
   getFootprintSizes,
-  fp,
 } from "@tscircuit/footprinter"
+
+const getFootprintParameterLines = (footprintNames: string[]): string => {
+  const parameterLines: string[] = []
+
+  for (const footprintName of footprintNames) {
+    try {
+      parameterLines.push(JSON.stringify(fp.string(footprintName).json()))
+    } catch {
+      // Parameterized footprints without defaults need a complete footprint string.
+    }
+  }
+
+  return parameterLines.join("\n")
+}
 
 async function fetchFileContent(url: string): Promise<string> {
   try {
@@ -26,11 +40,8 @@ export const createLocalCircuitPrompt = async () => {
     footprintSizes.map((footprintSize) => footprintSize.imperial),
   )
 
-  const footprintParams = footprintNamesByType.normalFootprintNames.reduce(
-    (initial, footprint) => {
-      return `${initial}${JSON.stringify(fp.string(footprint).json())}\n`
-    },
-    "",
+  const footprintParams = getFootprintParameterLines(
+    footprintNamesByType.normalFootprintNames,
   )
 
   const propsDoc =

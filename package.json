@@ -41,7 +41,7 @@
     "@babel/standalone": "^7.25.7",
     "@tscircuit/eval": "^0.0.93",
     "@tscircuit/featured-snippets": "^0.0.1",
-    "@tscircuit/footprinter": "^0.0.102",
+    "@tscircuit/footprinter": "^0.0.426",
     "comlink": "^4.4.2",
     "debug": "^4.3.7",
     "dotenv": "^16.4.7",
