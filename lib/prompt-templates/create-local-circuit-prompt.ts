@@ -28,7 +28,18 @@ export const createLocalCircuitPrompt = async () => {
 
   const footprintParams = footprintNamesByType.normalFootprintNames.reduce(
     (initial, footprint) => {
-      return `${initial}${JSON.stringify(fp.string(footprint).json())}\n`
+      try {
+        return `${initial}${JSON.stringify(fp.string(footprint).json())}\n`
+      } catch (error) {
+        // Bare names such as fpc and jst need parameters before expansion.
+        // Keep the name and diagnostic instead of inventing defaults or
+        // preventing the entire footprint catalog from being generated.
+        return `${initial}${JSON.stringify({
+          fn: footprint,
+          defaults_unavailable:
+            error instanceof Error ? error.message : String(error),
+        })}\n`
+      }
     },
     "",
   )
@@ -105,6 +116,8 @@ ${imperialFootprintSizes}
 - Or create a footprint string like this (e.g. dfn8_w5.3mm_p1.27mm, dip10_w4.00mm_p2.65mm, lqfp64_w10_h10_pl1_pw0.25mm, sot363, stampreceiver_left20_right20_bottom3_top2_w21mm_p2.54mm, tssop20_w6.5mm_p0.65mm, bga7_w8_h8_grid3x3_p1_missing(center,B1), bga64_w10_h10_grid8x8_p1.27mm), here are json objects with the available footprints and their options:
 
 ${footprintParams}
+
+Entries with defaults_unavailable include the expansion error, not a usable parameter set. Consult the footprint documentation and supply the required parameters before using them.
 
 - Here is a list of unsupported footprints: 
 
